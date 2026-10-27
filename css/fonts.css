@@ -1,0 +1,202 @@
+/* Local fonts, converted from the designer's installed copies to woff2.
+   Monofett loads from Google Fonts in index.html. */
+
+
+@font-face {
+  font-family: "Alpha54";
+  src: url("../assets/fonts/alpha54.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Beroga";
+  src: url("../assets/fonts/beroga.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Berolina";
+  src: url("../assets/fonts/berolina.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "CAT Altenglisch";
+  src: url("../assets/fonts/cat-altenglisch.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lucian Schoenschrift CAT";
+  src: url("../assets/fonts/lucian-schoenschrift-cat.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Brush Script MT";
+  src: url("../assets/fonts/brush-script-mt.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Helvetica Rounded";
+  src: url("../assets/fonts/helvetica-rounded-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Arial Narrow";
+  src: url("../assets/fonts/arial-narrow.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Arial Narrow";
+  src: url("../assets/fonts/arial-narrow-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Arial Narrow";
+  src: url("../assets/fonts/arial-narrow-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Arial Narrow";
+  src: url("../assets/fonts/arial-narrow-bold-italic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-light-italic.woff2") format("woff2");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-text.woff2") format("woff2");
+  font-weight: 350;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-text-italic.woff2") format("woff2");
+  font-weight: 350;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-regular-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-medium-italic.woff2") format("woff2");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-bold-italic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "GT Pressura Mono";
+  src: url("../assets/fonts/gt-pressura-mono-black-italic.woff2") format("woff2");
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+
+/* Shortcuts: font-family: var(--font-berolina); */
+:root {
+  --font-alpha54: "Alpha54", sans-serif;
+  --font-brush-script: "Brush Script MT", cursive;
+  --font-altenglisch: "CAT Altenglisch", serif;
+  --font-monofett: "Monofett", monospace;
+  --font-beroga: "Beroga", sans-serif;
+  --font-pressura-mono: "GT Pressura Mono", monospace;
+  --font-arial-narrow: "Arial Narrow", Arial, sans-serif;
+  --font-berolina: "Berolina", serif;
+  --font-helvetica-rounded: "Helvetica Rounded", Helvetica, Arial, sans-serif;
+  --font-schoenschrift: "Lucian Schoenschrift CAT", cursive;
+}
