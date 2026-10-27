@@ -786,39 +786,103 @@ input[type="submit"] {
   visibility: visible;
 }
 
-/* 3. Promo: outside the auto layout, in column 10 (Figma y 765) */
-.promo {
-  grid-column: 10 / 12;
-  grid-row: 1;
-  align-self: start;
-  margin-top: 366px;
-  display: flex;
-  align-items: flex-start;
-  gap: var(--module);
+/* 3. Shopping bag (Figma "paket", 149 x 187): fixed one gutter right of the main
+   content (columns 4-9) and 24px above the bottom of the screen. In a fixed element 100%
+   is the viewport width without the scrollbar, the same width the page grid uses. */
+.bag {
+  --column: calc((100% - 2 * var(--margin) - 11 * var(--gutter)) / 12);
+
+  position: fixed;
+  left: calc(var(--margin) + 9 * (var(--column) + var(--gutter)));
+  bottom: 24px;
+  z-index: 10;
+  width: 149px;
+  height: 187px;
 }
 
-/* Placeholder stripes until the poster image is exported */
-.promo__poster {
-  width: calc((100% - var(--gutter)) / 2 + 20px);
-  aspect-ratio: 128 / 187;
-  background: repeating-linear-gradient(90deg, #f0607a 0 12px, #f39a3c 12px 24px);
+/* The poster sticks out of the bag's top, behind it */
+.bag__poster {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  width: 106px;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border: 1px solid var(--color-text);
 }
 
-.promo__badges {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25em;
-  margin-top: 2.5em;
+.bag__body {
+  position: absolute;
+  top: 26px;
+  left: 0;
+  width: 110px;
+  height: 161px;
 }
 
-.promo__badges li {
+.bag__sale {
+  position: absolute;
+  top: 26px;
+  left: 122px;
+}
+
+.bag__sale li {
   display: grid;
   place-items: center;
-  width: 1.8em;
-  height: 1.8em;
-  border-radius: 50%;
+  width: 27px;
+  height: 27px;
+  padding-bottom: 6px;
+  border-radius: 20px;
   background: var(--color-text);
   color: var(--color-bg);
+  font-family: var(--font-caramel);
+  font-size: 18px;
+  line-height: 16px;
+}
+
+/* !!!(€) on a starburst at the bag's bottom edge */
+.bag__burst {
+  position: absolute;
+  top: 159px;
+  left: 81px;
+  display: flex;
+  align-items: flex-start;
+  color: #fff;
+  font-family: var(--font-arial-narrow);
+  font-style: italic;
+  line-height: 0.77;
+  letter-spacing: -0.43px;
+  text-transform: none;
+}
+
+.bag__burst-shape {
+  position: absolute;
+  top: calc(50% - 0.57px);
+  left: calc(50% - 0.16px);
+  width: 88px;
+  height: 71px;
+  max-width: none;
+  transform: translate(-50%, -50%) rotate(-23.87deg);
+}
+
+.bag__burst-big,
+.bag__burst-small {
+  position: relative;
+}
+
+.bag__burst-big {
+  font-size: 32px;
+}
+
+.bag__burst-small {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Phones get their own design later: no fixed bag there for now */
+@media (max-width: 767px) {
+  .bag {
+    display: none;
+  }
 }
 
 /* 4. Full-screen black ending: edge to edge, exactly one screen tall on every device */

@@ -300,14 +300,17 @@
         </section>
       </div>
 
-      <!-- 3. Side promo: sits outside the auto layout, in column 10 -->
-      <aside class="promo">
-        <div class="promo__poster">
-          <!-- Poster image goes here: assets/images/poster.png -->
-        </div>
-        <ul class="promo__badges" aria-label="sale">
+      <!-- 3. Shopping bag: fixed beside the main content, a poster tucked inside -->
+      <aside class="bag" aria-label="sale">
+        <img class="bag__poster" src="assets/images/bag-poster.jpg" alt="Постер Salad workshop">
+        <ul class="bag__sale" aria-hidden="true">
           <li>s</li><li>a</li><li>l</li><li>e</li>
         </ul>
+        <img class="bag__body" src="assets/images/bag.svg" alt="">
+        <span class="bag__burst" aria-hidden="true">
+          <img class="bag__burst-shape" src="assets/images/bag-burst.svg" alt="">
+          <span class="bag__burst-big">!!!</span><span class="bag__burst-small">(€)</span>
+        </span>
       </aside>
     </main>
   </div>

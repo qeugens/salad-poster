@@ -34,3 +34,23 @@ document.addEventListener('keydown', event => {
   overlay[name].hidden = !overlay[name].hidden
   save(name, !overlay[name].hidden)
 })
+
+// Shopping bag: fixed 24px above the bottom of the screen, but it never goes onto the
+// black ending. Once the black section comes close, the bag stops 100px above it
+// and scrolls away with the page.
+const bag = document.querySelector('.bag')
+const blackout = document.querySelector('.blackout')
+const BAG_SCREEN_GAP = 24  // from the bottom of the screen
+const BAG_BLACK_GAP = 100  // from the top of the black section
+
+function placeBag() {
+  const blackTop = blackout.getBoundingClientRect().top
+  const overlap = window.innerHeight - blackTop
+  bag.style.bottom = `${Math.max(BAG_SCREEN_GAP, overlap + BAG_BLACK_GAP)}px`
+}
+
+if (bag && blackout) {
+  placeBag()
+  window.addEventListener('scroll', placeBag, { passive: true })
+  window.addEventListener('resize', placeBag)
+}

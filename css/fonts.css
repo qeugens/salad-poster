@@ -11,6 +11,14 @@
 }
 
 @font-face {
+  font-family: "Caramel";
+  src: url("../assets/fonts/caramel.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "Beroga";
   src: url("../assets/fonts/beroga.woff2") format("woff2");
   font-weight: 400;
@@ -193,6 +201,7 @@
   --font-brush-script: "Brush Script MT", cursive;
   --font-altenglisch: "CAT Altenglisch", serif;
   --font-monofett: "Monofett", monospace;
+  --font-caramel: "Caramel", cursive;
   --font-beroga: "Beroga", sans-serif;
   --font-pressura-mono: "GT Pressura Mono", monospace;
   --font-arial-narrow: "Arial Narrow", Arial, sans-serif;
