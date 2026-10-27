@@ -58,6 +58,27 @@ body {
   color: var(--color-text);
 }
 
+/* Custom cursors (retro 3D hands, taken from akademijaoxford.com): a tilted hand
+   everywhere, an upright one over anything clickable. The .cur files carry their own
+   hotspot; the PNG copies (for Safari) name it: the fingertip in the 32x32 image. */
+:root {
+  --cursor-normal: url("../assets/cursors/normal.cur"), url("../assets/cursors/normal.png") 0 0, auto;
+  --cursor-link: url("../assets/cursors/hyperlink.cur"), url("../assets/cursors/hyperlink.png") 13 0, pointer;
+}
+
+html {
+  cursor: var(--cursor-normal);
+}
+
+a,
+button,
+label,
+[role="button"],
+input[type="button"],
+input[type="submit"] {
+  cursor: var(--cursor-link);
+}
+
 .page {
   min-height: 100vh;
   padding-bottom: 100px;
