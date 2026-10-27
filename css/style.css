@@ -37,6 +37,8 @@ img {
 :root {
   --color-bg: #ffffff;
   --color-text: #111111;
+  --color-orange: #ff9633;
+  --color-pink: #f74980;
 
   /* Layout grid from Figma (frame 1512 x 982) */
   --columns: 12;
@@ -331,6 +333,10 @@ body {
   letter-spacing: -0.02em;
 }
 
+.week__title--center {
+  justify-content: center;
+}
+
 .week__heading .rule {
   font-size: 20px;
   line-height: 20px;
@@ -547,6 +553,73 @@ body {
 .wday-chill .rule {
   font-size: 20px;
   line-height: 20px;
+}
+
+/* By who: two outlined cards, one per studio */
+.crew {
+  display: flex;
+  gap: 16px;
+}
+
+.crew__card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 16px;
+  border: 2px solid currentColor;
+  text-align: center;
+}
+
+.crew__card--shoplift {
+  color: var(--color-orange);
+}
+
+.crew__card--kaik {
+  color: var(--color-pink);
+}
+
+.crew__about {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.crew__name {
+  font-weight: 400;
+  font-size: 72px;
+  line-height: 70px;
+}
+
+.crew__card--shoplift .crew__name {
+  font-family: var(--font-berolina);
+}
+
+.crew__card--kaik .crew__name {
+  font-family: var(--font-altenglisch);
+  text-transform: none;
+}
+
+.crew__name::after {
+  content: "+++";
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-alpha54);
+  font-size: 20px;
+  line-height: 20px;
+}
+
+.crew__link {
+  color: inherit;
+  font-size: 46px;
+  line-height: 40px;
+  text-decoration: none;
+}
+
+.crew__link:hover {
+  text-decoration: underline;
 }
 
 /* 3. Promo: outside the auto layout, in column 10 (Figma y 765) */
