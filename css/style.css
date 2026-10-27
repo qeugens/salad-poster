@@ -48,9 +48,15 @@ img {
 
   /* Vertical rhythm */
   --hero-top: 84px;       /* page top -> title */
-  --hero-gap: 18px;       /* title -> workshop strip */
-  --content-top: 39px;    /* workshop strip -> content */
+  --hero-gap: 12px;       /* title -> workshop strip */
+  --content-top: 40px;    /* workshop strip -> content */
   --stack-gap: 100px;     /* auto layout gap between page sections */
+}
+
+/* The canvas behind the page is black, so scroll overflow (the bounce past
+   the top and bottom) shows black instead of white */
+html {
+  background: #000;
 }
 
 body {
@@ -81,7 +87,7 @@ input[type="submit"] {
 
 .page {
   min-height: 100vh;
-  padding-bottom: 100px;
+  padding-bottom: 98px;  /* Figma frame ends 98px below the content */
 }
 
 /* 12-column layout: place children with grid-column, e.g. `grid-column: 4 / 10` */
@@ -136,6 +142,7 @@ input[type="submit"] {
   overflow: visible;
   fill: var(--color-text);
   font-size: 210px;
+  font-weight: 400;
 }
 
 .title__s { font-family: var(--font-alpha54); }
@@ -244,6 +251,15 @@ input[type="submit"] {
   width: 363px;
 }
 
+.experiments__list li {
+  /* Rows sit 20px apart in Figma; the = rules hang a little below */
+  height: 20px;
+}
+
+.experiments__list li:last-child {
+  height: 21px;
+}
+
 .experiments__list li > span:not(.rule) {
   font-size: 20px;
   line-height: 20px;
@@ -266,6 +282,7 @@ input[type="submit"] {
 .result__row {
   align-items: center;
   gap: 7px;
+  margin-top: -2px;
 }
 
 .result__dish {
@@ -308,6 +325,7 @@ input[type="submit"] {
 }
 
 .order__sub {
+  font-weight: 400;
   font-size: 20px;
   line-height: 16px;
   letter-spacing: -0.02em;
@@ -324,6 +342,8 @@ input[type="submit"] {
 .week__head {
   display: flex;
   align-items: flex-start;
+  /* 40px in Figma: the = rule under the title overflows it */
+  height: 40px;
   gap: 4px;
 }
 
@@ -420,11 +440,16 @@ input[type="submit"] {
 }
 
 .day__list {
+  height: 123px;
   font-size: 20px;
   line-height: 20px;
 }
 
 /* Steps are separated by +++ */
+.day__steps li:last-child {
+  line-height: 14px;
+}
+
 .day__steps li + li::before {
   content: "+++";
   display: block;
@@ -441,7 +466,7 @@ input[type="submit"] {
 
 .wday {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 16px;
   height: 180px;
 }
@@ -485,8 +510,10 @@ input[type="submit"] {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  flex-shrink: 0;
   width: 488px;
-  height: 179px;
+  /* Fixed height from Figma, so every row lines up the same; it pokes 6px past the 180px block */
+  height: 186px;
 }
 
 .wday__note {
@@ -503,13 +530,15 @@ input[type="submit"] {
   line-height: 20px;
 }
 
-/* Title (and optional subtitle) sitting on a 2px line */
-.wday__end {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-bottom: 14px;
-  border-bottom: 2px solid var(--color-text);
+/* Title (and optional subtitle) above a dashed rule */
+.wday__end::after,
+.wday__below::after {
+  content: "-------------------------------------------------------------";
+  display: block;
+  font-family: var(--font-alpha54);
+  font-size: 20px;
+  line-height: 20px;
+  white-space: nowrap;
 }
 
 .wday__title {
@@ -524,6 +553,7 @@ input[type="submit"] {
 }
 
 .wday__sub {
+  margin-top: 10px;
   font-size: 14px;
   line-height: 14px;
 }
@@ -543,9 +573,15 @@ input[type="submit"] {
 
 .wday__below {
   display: flex;
-  gap: 18px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid var(--color-text);
+  flex-wrap: wrap;
+  column-gap: 18px;
+}
+
+/* The dashed rule runs under the whole вт - чт row */
+.wday__below::after {
+  content: "----------------------------------------------------------------------------------------------";
+  flex-basis: calc(100% + 2px);
+  margin-inline: -1px;
 }
 
 .wday__below .wday__note {
@@ -554,6 +590,7 @@ input[type="submit"] {
 
 .wday__wide {
   flex: 1;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -721,7 +758,6 @@ input[type="submit"] {
 }
 
 .big-order__currency {
-  font-weight: 700;
   font-size: 29px;
 }
 
@@ -908,7 +944,6 @@ input[type="submit"] {
 }
 
 .bag__burst-small {
-  font-weight: 700;
   font-size: 14px;
 }
 
