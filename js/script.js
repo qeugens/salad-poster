@@ -19,8 +19,11 @@ function save(name, isOn) {
   } catch {}
 }
 
+// ?grid=off in the URL hides the overlay without changing the saved choice
+const isForcedOff = new URLSearchParams(location.search).get('grid') === 'off'
+
 for (const name of Object.keys(overlay)) {
-  overlay[name].hidden = !load(name)
+  overlay[name].hidden = isForcedOff || !load(name)
 }
 
 document.addEventListener('keydown', event => {

@@ -250,26 +250,44 @@ body {
   line-height: 20px;
 }
 
+/* ORDER NOW bubble: a tilted ellipse behind two lines of white text */
 .order {
+  position: relative;
   align-self: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 180px;
-  height: 100px;
-  border-radius: 50%;
-  background: var(--color-text);
-  color: var(--color-bg);
+  width: 129px;
+  color: #fff;
   text-decoration: none;
-  text-transform: uppercase;
-  transform: rotate(-8deg);
+}
+
+.order__shape {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 161px;
+  height: 94px;
+  max-width: none;
+  transform: translate(calc(-50% - 0.79px), calc(-50% - 5.32px)) rotate(-12deg);
+}
+
+.order__main,
+.order__sub {
+  position: relative;
 }
 
 .order__main {
-  font-size: 2.5rem;
-  font-style: italic;
-  line-height: 1;
+  margin-bottom: -4px;
+  font-family: var(--font-alpha54);
+  font-size: 40px;
+  line-height: 40px;
+}
+
+.order__sub {
+  font-size: 20px;
+  line-height: 16px;
+  letter-spacing: -0.02em;
 }
 
 /* Week sections */
@@ -385,6 +403,148 @@ body {
   display: block;
   margin-bottom: 1px;
   font-family: var(--font-alpha54);
+  font-size: 20px;
+  line-height: 20px;
+}
+
+/* Week 2: giant day letters on black blocks */
+.week__days--big {
+  gap: 36px;
+}
+
+.wday {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  height: 180px;
+}
+
+.wday__name,
+.wday__range span {
+  display: block;
+  width: 236px;
+  height: 180px;
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-weight: 500;
+  font-size: 243px;
+  letter-spacing: -0.07em;
+  text-align: center;
+  /* A letter pair is a little wider than the box, and CSS start-aligns overflowing
+     text instead of centring it: the indent centres it as in Figma */
+  padding-right: 0.07em;
+  text-indent: calc(-0.029em + var(--nudge, 0px));
+  /* Fallback without text-box trimming: a line height that puts the caps
+     5px from the top of the box, worked out from the font's ascent/descent */
+  line-height: 0.617;
+}
+
+/* The single dash fits, so it centres by itself */
+.wday__range span:nth-child(2) {
+  text-indent: 0;
+}
+
+/* Like Figma: trim the line to cap height, then centre it in the 180px box */
+@supports (text-box: trim-both cap alphabetic) {
+  .wday__name,
+  .wday__range span {
+    padding-top: 5px;
+    line-height: normal;
+    text-box: trim-both cap alphabetic;
+  }
+}
+
+.wday__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 488px;
+  height: 179px;
+}
+
+.wday__note {
+  width: 362px;
+  line-height: 17px;
+}
+
+.wday__note::before {
+  content: "+++";
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--font-alpha54);
+  font-size: 20px;
+  line-height: 20px;
+}
+
+/* Title (and optional subtitle) sitting on a 2px line */
+.wday__end {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--color-text);
+}
+
+.wday__title {
+  width: 362px;
+  font-weight: 500;
+  font-size: 46px;
+  line-height: 40px;
+}
+
+.wday__title--wide {
+  width: 100%;
+}
+
+.wday__sub {
+  font-size: 14px;
+  line-height: 14px;
+}
+
+/* вт - чт: one black bar, then the details underneath */
+.wday--span {
+  flex-direction: column;
+  align-items: stretch;
+  height: auto;
+}
+
+.wday__range {
+  display: flex;
+  gap: 16px;
+  background: var(--color-text);
+}
+
+.wday__below {
+  display: flex;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--color-text);
+}
+
+.wday__below .wday__note {
+  width: 235px;
+}
+
+.wday__wide {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wday__art {
+  height: 80px;
+  width: auto;
+}
+
+.wday-chill {
+  height: 30px;
+  align-items: center;
+  font-size: 20px;
+  line-height: 20px;
+}
+
+.wday-chill .rule {
   font-size: 20px;
   line-height: 20px;
 }
