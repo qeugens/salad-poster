@@ -800,6 +800,14 @@ body {
   color: var(--color-bg);
 }
 
+/* 4. Full-screen black ending: edge to edge, exactly one screen tall on every device */
+.blackout {
+  width: 100%;
+  height: 100vh;   /* fallback for older browsers */
+  height: 100dvh;  /* follows the visible screen on phones as the browser bars show and hide */
+  background: #000;
+}
+
 /* Grid overlay for checking against Figma: press G to toggle columns, M for the module grid */
 .grid-overlay {
   position: fixed;
