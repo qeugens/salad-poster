@@ -96,6 +96,28 @@ body::after {
   background-position: 0 100%;
 }
 
+/* Scrollbar: a square white thumb on a full-height black track */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #fff;
+  border-radius: 0;
+}
+
+/* Firefox has no scrollbar pseudo-elements; it takes the colours only */
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-color: #fff #000;
+  }
+}
+
 /* Custom cursors (retro 3D hands, taken from akademijaoxford.com): a tilted hand
    everywhere, an upright one over anything clickable. The .cur files carry their own
    hotspot; the PNG copies (for Safari) name it: the fingertip in the 32x32 image. */
