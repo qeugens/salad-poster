@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Salad Poster</title>
+  <title>Salad — online workshop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Monofett&display=swap">
@@ -11,9 +11,91 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <main class="page">
-    <h1>Salad Poster</h1>
-  </main>
+  <div class="page">
+    <!-- 1. Title + "online workshop" strip -->
+    <header class="hero grid">
+      <!-- Each letter set at 210px in its own font, placed as in Figma (frame 1512px wide) -->
+      <h1 class="title">
+        <svg class="title__word" viewBox="0 0 740 203" role="img" aria-label="Salad">
+          <text class="title__s" x="-3" y="186.8">S</text>
+          <text class="title__a" x="104.7" y="191.7">A</text>
+          <text class="title__l" x="243.1" y="177.7">L</text>
+          <text class="title__a-box" x="418" y="163.4">A</text>
+          <text class="title__d" x="556.5" y="192.2">d</text>
+        </svg>
+      </h1>
+
+      <div class="workshop">
+        <span class="rule" aria-hidden="true"></span>
+        <p class="workshop__label">– online - workshop -</p>
+        <span class="rule" aria-hidden="true"></span>
+      </div>
+    </header>
+
+    <!-- 2. Content: Figma auto layout = vertical flex stack -->
+    <main class="content grid">
+      <div class="stack">
+        <section class="topics">
+          <h2 class="topic">
+            <span class="badge" aria-hidden="true">!</span>
+            Салат как композиционная структура:
+          </h2>
+          <h2 class="topic topic--end">
+            Принципы объединения разрозненных элементов
+            <span class="badge" aria-hidden="true">!</span>
+          </h2>
+        </section>
+
+        <p class="callout">
+          Учимся видеть композицию всюду и работать
+          с элементами, которые есть под рукой
+        </p>
+
+        <section class="experiments">
+          <p class="experiments__lead">Экспериментируем с</p>
+          <ul class="experiments__list">
+            <li class="ruled-row"><span class="rule"></span><span>масштабом</span><span class="rule"></span></li>
+            <li class="ruled-row"><span class="rule"></span><span>формой</span><span class="rule"></span></li>
+            <li class="ruled-row"><span class="rule"></span><span>нарезкой</span><span class="rule"></span></li>
+            <li class="ruled-row"><span class="rule"></span><span>соусом</span><span class="rule"></span></li>
+          </ul>
+        </section>
+
+        <div class="plus-row" aria-hidden="true">
+          <span>+++</span><span>+++</span><span>+++</span>
+        </div>
+
+        <p class="result ruled-row">
+          <span class="result__start">И превращаем набор разрозненных ингредиентов</span>
+          <span class="rule" aria-hidden="true"></span>
+          <span>в готовое блюдо</span>
+        </p>
+
+        <a class="order" href="#">
+          <span class="order__main">Order</span>
+          <span class="order__sub">now</span>
+        </a>
+      </div>
+
+      <!-- 3. Side promo: sits outside the auto layout, in column 10 -->
+      <aside class="promo">
+        <div class="promo__poster">
+          <!-- Poster image goes here: assets/images/poster.png -->
+        </div>
+        <ul class="promo__badges" aria-label="sale">
+          <li>s</li><li>a</li><li>l</li><li>e</li>
+        </ul>
+      </aside>
+    </main>
+  </div>
+
+  <div class="grid-overlay" aria-hidden="true">
+    <div class="grid-overlay__columns grid">
+      <div></div><div></div><div></div><div></div><div></div><div></div>
+      <div></div><div></div><div></div><div></div><div></div><div></div>
+    </div>
+    <div class="grid-overlay__module"></div>
+  </div>
 
   <script src="js/script.js"></script>
 </body>
