@@ -49,7 +49,7 @@ img {
   --module: 9px;
 
   /* Vertical rhythm */
-  --hero-top: 84px;       /* page top -> title */
+  --hero-top: 64px;       /* page top -> title */
   --hero-gap: 12px;       /* title -> workshop strip */
   --content-top: 40px;    /* workshop strip -> content */
   --stack-gap: 100px;     /* auto layout gap between page sections */
@@ -58,8 +58,9 @@ img {
 /* Black behind the page, with a + pattern on a layer pinned to the screen. Browsers paint
    only the plain colour in the scroll bounce area, so the pattern lives on a fixed layer
    that stays put while the page bounces; the black ending is transparent and shows it too */
+/* White canvas: what the bounce past the bottom of the page shows */
 html {
-  background: #000;
+  background: var(--color-bg);
 }
 
 body {
@@ -86,6 +87,7 @@ body::before {
   top: 0;
   bottom: 0;
   z-index: -1;
+  background-color: #000;
 }
 
 /* Just above the top of the page, out of scroll reach: only the bounce past the top
@@ -197,9 +199,10 @@ input[type="submit"] {
 .title {
   /* Hover timing for the letters (see "Hover" below) */
   --lift: -10px;
+  --lean: 8px; /* the end letters also lean out sideways: S left, d right */
   --lift-ms: 160ms;
-  --swap-delay: 80ms;
-  --hold-ms: 500ms;
+  --swap-delay: 0ms; /* the swap happens the moment the mouse touches the letter */
+  --hold-ms: 300ms;
   position: relative;
   z-index: 2;
   display: grid;
@@ -227,7 +230,7 @@ input[type="submit"] {
 .title__a-box { font-family: var(--font-monofett); }
 .title__d { font-family: var(--font-beroga); }
 
-/* Hover: the letter lifts a little and halfway up swaps to its look from the
+/* Hover: the letter lifts a little and at once swaps to its look from the
    Figma components (s/a/l/a/d, Variant2): the letter tilted, in another font, with
    a thick colored outline. Angles and letter positions in index.html are taken
    from those components. After the mouse leaves, the card stays a moment, then
@@ -267,25 +270,42 @@ input[type="submit"] {
   transition: opacity 0s var(--hold-ms), visibility 0s var(--hold-ms);
 }
 
-/* Lifts a little and stays up while hovered; the swap happens halfway up */
-.title__letter:hover {
-  translate: 0 var(--lift);
+/* Lifts a little and stays up while hovered, moving off right away (ease-out).
+   .is-lit plays the same look from js/script.js (the quick wave on page load). */
+.title__letter:hover,
+.is-lit .title__letter {
+  translate: var(--side, 0px) var(--lift);
   transition-delay: 0s;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
+.title__word:first-child { --side: calc(-1 * var(--lean)); }
+.title__word:last-child { --side: var(--lean); }
+
 .title__letter:hover > text,
-.title__letter:hover .title__card {
+.title__letter:hover .title__card,
+.is-lit .title__letter > text,
+.is-lit .title__card {
   transition-delay: var(--swap-delay);
 }
 
 /* The hovered letter comes to the front, and stays there while it holds its look */
-.title__word:hover {
+.title__word:hover,
+.title__word.is-lit {
   z-index: 2;
   transition-delay: 0s;
 }
 
-.title__letter:hover > text { opacity: 0; }
-.title__letter:hover .title__card { visibility: visible; }
+.title__letter:hover > text,
+.is-lit .title__letter > text { opacity: 0; }
+
+.title__letter:hover .title__card,
+.is-lit .title__card { visibility: visible; }
+
+/* During the wave a letter lets go right away instead of holding its look */
+.title.is-waving {
+  --hold-ms: var(--swap-delay);
+}
 
 .workshop {
   display: flex;

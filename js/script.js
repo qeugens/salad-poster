@@ -54,3 +54,27 @@ if (bag && blackout) {
   window.addEventListener('scroll', placeBag, { passive: true })
   window.addEventListener('resize', placeBag)
 }
+
+// SALAD title: right after load the letters flash their hover look one after another,
+// left to right, in under a second. Skipped for reduced motion.
+const title = document.querySelector('.title')
+const WAVE_STEP_MS = 80  // between one letter lighting up and the next
+const WAVE_LIT_MS = 160  // how long each letter stays lit
+
+function waveTitle() {
+  const letters = [...title.querySelectorAll('.title__word')]
+  title.classList.add('is-waving')
+
+  letters.forEach((letter, i) => {
+    setTimeout(() => letter.classList.add('is-lit'), i * WAVE_STEP_MS)
+    setTimeout(() => letter.classList.remove('is-lit'), i * WAVE_STEP_MS + WAVE_LIT_MS)
+  })
+
+  // Back to the normal hover hold once the last letter has settled
+  const end = (letters.length - 1) * WAVE_STEP_MS + WAVE_LIT_MS + 300
+  setTimeout(() => title.classList.remove('is-waving'), end)
+}
+
+if (title && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.fonts.ready.then(waveTitle)
+}
