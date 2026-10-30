@@ -14,14 +14,49 @@
   <div class="page">
     <!-- 1. Title + "online workshop" strip -->
     <header class="hero grid">
-      <!-- Each letter set at 210px in its own font, placed as in Figma (frame 1512px wide) -->
-      <h1 class="title">
-        <svg class="title__word" viewBox="0 0 740 203" role="img" aria-label="Salad">
-          <text class="title__s" x="-3" y="186.8">S</text>
-          <text class="title__a" x="104.7" y="191.7">A</text>
-          <text class="title__l" x="243.1" y="177.7">L</text>
-          <text class="title__a-box" x="418" y="163.4">A</text>
-          <text class="title__d" x="556.5" y="192.2">d</text>
+      <!-- Each letter set at 210px in its own font, placed as in Figma (frame 1512px wide).
+           Every letter is its own SVG layered on the others (same viewBox), so a hovered
+           letter can rise above its neighbors and the content below -->
+      <h1 class="title" aria-label="Salad">
+        <svg class="title__word" viewBox="0 0 740 203" aria-hidden="true">
+          <g class="title__letter">
+            <text class="title__s" x="-3" y="186.8">S</text>
+            <g class="title__card" transform="rotate(-4 86.8 121.2)">
+              <text x="9.2" y="188.5">S</text>
+            </g>
+          </g>
+        </svg>
+        <svg class="title__word" viewBox="0 0 740 203" aria-hidden="true">
+          <g class="title__letter">
+            <text class="title__a" x="104.7" y="191.7">A</text>
+            <g class="title__card" transform="rotate(2 185.5 125.3)">
+              <text x="113.3" y="207.8">A</text>
+            </g>
+          </g>
+        </svg>
+        <svg class="title__word" viewBox="0 0 740 203" aria-hidden="true">
+          <g class="title__letter">
+            <text class="title__l" x="243.1" y="177.7">L</text>
+            <g class="title__card" transform="rotate(-6 341.9 115.6)">
+              <text x="250.5" y="178.1">L</text>
+            </g>
+          </g>
+        </svg>
+        <svg class="title__word" viewBox="0 0 740 203" aria-hidden="true">
+          <g class="title__letter">
+            <text class="title__a-box" x="418" y="163.4">A</text>
+            <g class="title__card" transform="rotate(4 505.6 74.4)">
+              <text x="441.2" y="156.6">A</text>
+            </g>
+          </g>
+        </svg>
+        <svg class="title__word" viewBox="0 0 740 203" aria-hidden="true">
+          <g class="title__letter">
+            <text class="title__d" x="556.5" y="192.2">d</text>
+            <g class="title__card" transform="rotate(4 647.1 121.5)">
+              <text x="570.6" y="216.8">d</text>
+            </g>
+          </g>
         </svg>
       </h1>
 

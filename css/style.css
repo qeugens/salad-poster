@@ -192,7 +192,26 @@ input[type="submit"] {
   row-gap: var(--hero-gap);
 }
 
+/* The five letter SVGs share one grid cell. Above the rest of the page,
+   so a hovered letter's outline can spill over the strip and content below */
+.title {
+  /* Hover timing for the letters (see "Hover" below) */
+  --lift: -10px;
+  --lift-ms: 160ms;
+  --swap-delay: 80ms;
+  --hold-ms: 500ms;
+  position: relative;
+  z-index: 2;
+  display: grid;
+}
+
 .title__word {
+  grid-area: 1 / 1;
+  position: relative;
+  z-index: 1;
+  /* Only the letters themselves catch the mouse, not each full-width SVG box */
+  pointer-events: none;
+  transition: z-index 0s var(--hold-ms);
   display: block;
   width: 100%;
   height: auto;
@@ -207,6 +226,66 @@ input[type="submit"] {
 .title__l { font-family: var(--font-altenglisch); }
 .title__a-box { font-family: var(--font-monofett); }
 .title__d { font-family: var(--font-beroga); }
+
+/* Hover: the letter lifts a little and halfway up swaps to its look from the
+   Figma components (s/a/l/a/d, Variant2): the letter tilted, in another font, with
+   a thick colored outline. Angles and letter positions in index.html are taken
+   from those components. After the mouse leaves, the card stays a moment, then
+   the letter sinks back the same way. */
+.title__letter {
+  pointer-events: visiblePainted;
+  cursor: default;
+  /* Mirrors the way up: starts sinking just before the card goes away, so it swaps back halfway down */
+  transition: translate var(--lift-ms) cubic-bezier(0.3, 0, 0.3, 1) calc(var(--hold-ms) - var(--swap-delay));
+}
+
+.title__card {
+  visibility: hidden;
+  font-size: 210.855px;
+  font-weight: 400;
+  text-transform: none;
+}
+
+.title__word:nth-child(1) .title__card { --ink: #ff66ca; --outline: #1164ff; --outline-w: 25px; font-family: var(--font-altenglisch); }
+.title__word:nth-child(2) .title__card { --ink: #00aa58; --outline: #00d4fe; --outline-w: 28px; font-family: var(--font-helvetica-rounded); font-weight: 700; }
+.title__word:nth-child(3) .title__card { --ink: #0083fe; --outline: #6a4336; --outline-w: 28px; font-family: var(--font-schoenschrift); }
+.title__word:nth-child(4) .title__card { --ink: #fb5e24; --outline: #fe9ace; --outline-w: 28px; font-family: var(--font-alpha54); }
+.title__word:nth-child(5) .title__card { --ink: #18c1f0; --outline: #7200fe; --outline-w: 21px; font-family: var(--font-brush-script); font-style: italic; font-size: 344.62px; }
+
+/* Figma's outside stroke: twice as wide and painted under the fill, with round corners */
+.title__card text {
+  fill: var(--ink);
+  stroke: var(--outline);
+  stroke-width: calc(2 * var(--outline-w));
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+/* Swapped in one go; the plain letter only goes transparent so it keeps the hover */
+.title__letter > text,
+.title__card {
+  transition: opacity 0s var(--hold-ms), visibility 0s var(--hold-ms);
+}
+
+/* Lifts a little and stays up while hovered; the swap happens halfway up */
+.title__letter:hover {
+  translate: 0 var(--lift);
+  transition-delay: 0s;
+}
+
+.title__letter:hover > text,
+.title__letter:hover .title__card {
+  transition-delay: var(--swap-delay);
+}
+
+/* The hovered letter comes to the front, and stays there while it holds its look */
+.title__word:hover {
+  z-index: 2;
+  transition-delay: 0s;
+}
+
+.title__letter:hover > text { opacity: 0; }
+.title__letter:hover .title__card { visibility: visible; }
 
 .workshop {
   display: flex;
@@ -952,6 +1031,15 @@ input[type="submit"] {
 
   .bag__burst {
     transition: none;
+  }
+
+  .title__letter:hover {
+    translate: none;
+  }
+
+  .title__letter:hover > text,
+  .title__letter:hover .title__card {
+    transition-delay: 0s;
   }
 }
 
