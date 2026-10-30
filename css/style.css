@@ -148,6 +148,9 @@ input[type="submit"] {
   min-height: 100vh;
   background: var(--color-bg);
   padding-bottom: 98px;  /* Figma frame ends 98px below the content */
+  /* Its own layer stack, so the feed can sit behind the content but above the white */
+  position: relative;
+  z-index: 0;
 }
 
 /* 12-column layout: place children with grid-column, e.g. `grid-column: 4 / 10` */
@@ -1171,6 +1174,62 @@ input[type="submit"] {
   height: 100vh;   /* fallback for older browsers */
   height: 100dvh;  /* follows the visible screen on phones as the browser bars show and hide */
   /* Transparent: the dotted black canvas shows through */
+}
+
+/* Product feed: ASCII fruits and veggies in columns 1-3 and 10-12, the whole height of
+   the landing (not the black ending), the left one always drifting up, the right one
+   down, faster while the page scrolls. Tiles and motion come from js/script.js; each
+   track holds its tiles twice, so moving it by one set loops. */
+.feed {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.feed__side {
+  overflow: hidden;
+}
+
+.feed__side--left { grid-column: 1 / 4; }
+.feed__side--right { grid-column: 10 / 13; }
+
+.feed__track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--feed-gap, 0px);
+  will-change: translate;
+}
+
+.feed__track .blackout__item {
+  color: var(--color-text);
+  font-size: var(--feed-font, 9px);
+  line-height: 1.111;
+  height: calc(20 * 1.111em);  /* 20 lines, also when the last ones are empty */
+  flex: none;
+}
+
+/* ASCII fruits and veggies on the black ending, in a grid filled from js/script.js */
+.blackout__produce {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 1), auto);
+  justify-content: space-evenly;
+  align-content: space-evenly;
+  width: 100%;
+  height: 100%;
+}
+
+.blackout__item {
+  margin: 0;
+  color: #fff;
+  /* The system monospace: GT Pressura Mono has almost none of the symbols ASCII art needs */
+  font-family: monospace;
+  font-size: 9px;
+  line-height: 10px;
+  white-space: pre;
+  /* Every tile is 40 x 20 characters, also where a drawing's lines are shorter */
+  width: 40ch;
+  height: 200px;
 }
 
 /* Grid overlay for checking against Figma: press G to toggle columns, M for the module grid */

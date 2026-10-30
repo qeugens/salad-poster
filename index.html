@@ -12,6 +12,11 @@
 </head>
 <body>
   <div class="page">
+    <!-- ASCII fruits and veggies drifting up beside the content, filled from js/script.js -->
+    <div class="feed grid" aria-hidden="true">
+      <div class="feed__side feed__side--left"><div class="feed__track"></div></div>
+      <div class="feed__side feed__side--right"><div class="feed__track"></div></div>
+    </div>
     <!-- 1. Title + "online workshop" strip -->
     <header class="hero grid">
       <!-- Each letter set at 210px in its own font, placed as in Figma (frame 1512px wide).
@@ -354,7 +359,9 @@
   </div>
 
   <!-- 4. Full-screen black ending -->
-  <section class="blackout" id="end" aria-hidden="true"></section>
+  <section class="blackout" id="end" aria-hidden="true">
+    <div class="blackout__produce"></div>
+  </section>
 
   <div class="grid-overlay" aria-hidden="true">
     <div class="grid-overlay__columns grid">
@@ -364,6 +371,7 @@
     <div class="grid-overlay__module"></div>
   </div>
 
+  <script src="js/produce.js"></script>
   <script src="js/script.js"></script>
 </body>
 </html>
