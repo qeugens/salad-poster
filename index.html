@@ -180,7 +180,7 @@
 
             <article class="wday wday--span">
               <p class="wday__range" aria-label="вт - чт">
-                <span style="--nudge: -3px">вт</span><span>-</span><span style="--nudge: 1px">чт</span>
+                <span style="--nudge: -3px">вт</span><span>-</span><span style="--nudge: 3.5px; --tracking: -0.09em">чт</span>
               </p>
               <div class="wday__below">
                 <p class="wday__note">индивидуальная работа</p>
@@ -192,7 +192,7 @@
             </article>
 
             <article class="wday">
-              <p class="wday__name" style="--nudge: 2px">чт</p>
+              <p class="wday__name" style="--nudge: 3.5px; --tracking: -0.09em">чт</p>
               <div class="wday__body">
                 <p class="wday__note">разговор с личным фидбэком о финализации плаката</p>
                 <div class="wday__end">
@@ -302,7 +302,10 @@
 
       <!-- 3. Shopping bag: fixed beside the main content, a poster tucked inside -->
       <aside class="bag" aria-label="sale">
-        <img class="bag__poster" src="assets/images/bag-poster.jpg" alt="Постер Salad workshop">
+        <div class="bag__poster">
+          <img class="bag__poster-face" src="assets/images/bag-poster.jpg" alt="Постер Salad workshop">
+          <img class="bag__poster-face bag__poster-face--back" src="assets/images/bag-poster.jpg" alt="">
+        </div>
         <ul class="bag__sale" aria-hidden="true">
           <li>s</li><li>a</li><li>l</li><li>e</li>
         </ul>
