@@ -57,14 +57,29 @@ if (statusTint && page) {
 
 // Shopping bag: fixed 24px above the bottom of the screen, but it never goes onto the
 // black ending. Once the black section comes close, the bag stops 100px above it
-// and scrolls away with the page.
+// and scrolls away with the page. On phones it stays put and the black ending slides
+// over it instead: everything below the black section's top edge is cut away.
 const bag = document.querySelector('.bag')
 const blackout = document.querySelector('.blackout')
+const isPhone = matchMedia('(max-width: 430px)')
 const BAG_SCREEN_GAP = 24  // from the bottom of the screen
 const BAG_BLACK_GAP = 100  // from the top of the black section
 
 function placeBag() {
   const blackTop = blackout.getBoundingClientRect().top
+
+  if (isPhone.matches) {
+    bag.style.bottom = ''
+    const box = bag.getBoundingClientRect()
+    const scale = box.width / bag.offsetWidth
+    // In the bag's own units, from its bottom edge; unclipped while the black is below it
+    const cut = (box.bottom - blackTop) / scale
+    bag.style.setProperty('--bag-cut', cut > 0 ? `${cut}px` : '')
+    if (blackTop < window.innerHeight) openBag(false)  // the poster goes back once the black shows
+    return
+  }
+
+  bag.style.removeProperty('--bag-cut')
   const overlap = window.innerHeight - blackTop
   bag.style.bottom = `${Math.max(BAG_SCREEN_GAP, overlap + BAG_BLACK_GAP)}px`
 }
@@ -73,12 +88,11 @@ if (bag && blackout) {
   placeBag()
   window.addEventListener('scroll', placeBag, { passive: true })
   window.addEventListener('resize', placeBag)
+  isPhone.addEventListener('change', placeBag)
 }
 
 // The poster comes out of the bag (.is-open): on hover on desktop, on tap on phones.
 // A tap on the bag again, anywhere else, or Escape puts it back.
-const isPhone = matchMedia('(max-width: 430px)')
-
 function openBag(isOpen) {
   bag.classList.toggle('is-open', isOpen)
 }

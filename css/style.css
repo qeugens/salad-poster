@@ -1196,32 +1196,39 @@ input[type="submit"] {
   }
 }
 
-/* Phones: the bag sits in the middle of the screen's bottom edge and opens on tap.
-   The poster grows to the screen width (less the margins, and short enough to fit
-   above the bag), centred on the screen, with the same bottom edge as on desktop */
+/* Phones: the bag sits in the middle of the screen's bottom edge, 130px wide (Figma frame
+   "iPhone 13 & 14 - 2"), its top 116.74px above the bottom of the screen and the rest
+   hidden below it. It is the desktop bag scaled from its top centre; it opens on tap.
+   The poster grows to the screen width (less the margins, and short enough to fit above
+   the bag), centred on the screen, its bottom edge 27px above the bag. The black ending
+   slides over the bag: the part below its top edge is cut away (--bag-cut, set in JS) */
 @media (max-width: 430px) {
   .bag {
-    --poster-lift: 40px; /* how much higher than on desktop the poster's bottom edge goes */
-    /* Short screens: no taller than fits between the bag and 8px below the screen top */
-    --poster-w: min(100vw - 2 * var(--margin), (100dvh - 206px - var(--poster-lift)) * 0.75);
+    --bag-scale: calc(130 / 110);
+    --bag-peek: 116.74px;   /* how much of the bag shows above the bottom of the screen */
+    --poster-gap: 27px;     /* open poster's bottom edge -> the bag's top */
+    /* Open poster width on screen; on short screens no taller than fits above the bag
+       up to 8px below the top of the screen */
+    --poster-w: min(100vw - 2 * var(--margin), (100dvh - var(--bag-peek) - var(--poster-gap) - 8px) * 0.75);
 
-    /* Centred on the bag itself (110px wide); the star sticks out to the right */
     left: calc(50% - 110px / 2);
+    bottom: calc(var(--bag-peek) - 187px);
     width: 110px;
-    /* A 6px white outline around the whole bag, like the star's; the star and the
-       open poster sit on top of it */
-    outline: 6px solid var(--color-bg);
+    scale: var(--bag-scale);
+    transform-origin: 50% 0;
+    clip-path: inset(-100vh -100vw var(--bag-cut, -100vh) -100vw);
   }
 
   .bag__sale {
     display: none;
   }
 
+  /* In the bag's own (scaled) units, so on screen it is --poster-w wide */
   .bag.is-open .bag__poster {
-    top: calc(13px - var(--poster-lift) - var(--poster-w) * 4 / 3);
-    left: calc((110px - var(--poster-w)) / 2);
-    width: var(--poster-w);
-    height: calc(var(--poster-w) * 4 / 3);
+    top: calc((0px - var(--poster-gap) - var(--poster-w) * 4 / 3) / var(--bag-scale));
+    left: calc((110px - var(--poster-w) / var(--bag-scale)) / 2);
+    width: calc(var(--poster-w) / var(--bag-scale));
+    height: calc(var(--poster-w) * 4 / 3 / var(--bag-scale));
   }
 }
 
