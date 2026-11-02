@@ -64,8 +64,10 @@ html {
   background: var(--color-bg);
 }
 
+/* Black body (hidden under the page): newer iOS Safari takes the status bar colour from it */
 body {
   color: var(--color-text);
+  background: #000;
 }
 
 html {
