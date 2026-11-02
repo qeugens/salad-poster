@@ -103,6 +103,27 @@ body::after {
   background-position: 0 100%;
 }
 
+/* A 1px black strip pinned to the top of the screen on touch devices. Safari 26 ignores
+   theme-color and tints the status bar from a fixed element at the top edge instead
+   (pseudo-elements don't count). It sits under the status bar, so it isn't seen */
+.status-tint {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .status-tint {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    z-index: 10000;
+    background: #000;
+    pointer-events: none;
+  }
+}
+
 /* Scrollbar: a square white thumb on a full-height black track */
 ::-webkit-scrollbar {
   width: 9px;
@@ -1212,8 +1233,9 @@ input[type="submit"] {
     grid-column: 1 / -1;
   }
 
-  /* Spacing from the mobile frame (390px, y from the top of the screen): the white
-     sheet from y 56, title box from y 88, the strip's rules at y 231 and 266, content from y 348 */
+  /* Spacing from the mobile frame (390px, y from under its 59px status bar, which the
+     browser draws itself): the white sheet from y 16, title box from y 48, the strip's
+     rules at y 191 and 226, content from y 308 */
   :root {
     --hero-top: 32px;
     --hero-gap: 40.4px;
@@ -1221,15 +1243,19 @@ input[type="submit"] {
   }
 
   /* The page is a white sheet on the black canvas, torn into a zigzag along the top */
+  /* The zigzag sits inside the sheet's top 11.1px, left unpainted so the black shows
+     between the teeth: Safari's overflow-x: clip cuts the top too, so it can't hang above */
   .page {
     position: relative;
-    margin-top: 56px;
+    margin-top: 4.9px;
+    padding-top: 11.1px;
+    background: linear-gradient(var(--color-bg), var(--color-bg)) 0 11.1px / 100% 100% no-repeat;
   }
 
   .page::before {
     content: "";
     position: absolute;
-    bottom: 100%;
+    top: 0;
     left: 0;
     width: 100%;
     height: 11.1px;
@@ -1248,7 +1274,7 @@ input[type="submit"] {
   .title__word:nth-child(1) { --ox: 0%; --oy: 10.431%; --dx: 0%; --dy: 2.423%; z-index: 1; }
   .title__word:nth-child(2) { --ox: 14.555%; --oy: 13.87%; --dx: -0.652%; --dy: 6.197%; z-index: 5; }
   .title__word:nth-child(3) { --ox: 33.154%; --oy: 6.01%; --dx: -0.957%; --dy: 1.916%; z-index: 4; }
-  .title__word:nth-child(4) { --ox: 56.739%; --oy: -14.133%; --dx: -0.394%; --dy: -2.336%; z-index: 3; }
+  .title__word:nth-child(4) { --ox: 56.739%; --oy: -14.133%; --dx: -0.394%; --dy: 1.319%; z-index: 3; }
   .title__word:nth-child(5) { --ox: 75.337%; --oy: 8.466%; --dx: -1.506%; --dy: 5.531%; z-index: 6; }
 
   /* No tap animation on phones: the letters ignore touches (the load wave replays instead) */
@@ -1283,16 +1309,16 @@ input[type="submit"] {
   .title__swoosh {
     z-index: 2;
     left: 87.199%;
-    top: 116.54%;
+    top: 106.798%;
     width: 85.969%;
-    transform-origin: 1.248% 4.432%;
+    transform-origin: 1.248% 4.424%;
     transform: matrix(-0.96593, -0.25882, -0.25882, 0.96593, 0, 0);
   }
 
   .title__tomato {
     z-index: 7;
-    left: 76.471%;
-    top: 87.719%;
+    left: 79.412%;
+    top: 83.823%;
     width: 17.161%;
   }
 
@@ -1311,13 +1337,14 @@ input[type="submit"] {
     margin-top: -8px;
   }
 
-  /* The two topic lines stack, the second tucked 20px up (both start at the left) */
+  /* The two topic lines stack, the second tucked 20px up and pushed to the right edge */
   .topics {
     flex-direction: column;
     gap: 0;
   }
 
   .topic--end {
+    align-self: flex-end;
     margin-top: -20px;
   }
 
