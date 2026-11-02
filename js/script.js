@@ -1,4 +1,4 @@
-// Grid overlay: G toggles the columns, M the module grid. The choice is remembered.
+// Grid overlay (off by default): G toggles the columns, M the module grid. The choice is remembered.
 const overlay = {
   columns: document.querySelector('.grid-overlay__columns'),
   module: document.querySelector('.grid-overlay__module'),
@@ -7,9 +7,9 @@ const keys = { g: 'columns', m: 'module' }
 
 function load(name) {
   try {
-    return localStorage.getItem(`grid-${name}`) !== 'off'
+    return localStorage.getItem(`grid-${name}`) === 'on'
   } catch {
-    return true
+    return false
   }
 }
 
