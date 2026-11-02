@@ -128,6 +128,13 @@ body::after {
   .status-tint.is-hidden {
     clip-path: inset(0 0 100% 0);
   }
+
+  /* The same for Safari's bottom bar: the phone bag touches the bottom edge, and without
+     this Safari would take the bar colour from the bag, which has none */
+  .status-tint--bottom {
+    top: auto;
+    bottom: 0;
+  }
 }
 
 /* Scrollbar: a square white thumb on a full-height black track */
@@ -1353,11 +1360,14 @@ input[type="submit"] {
   /* The two topic lines stack, the second tucked 20px up and pushed to the right edge */
   .topics {
     flex-direction: column;
+    align-items: stretch;
     gap: 0;
   }
 
+  /* Full width with its content pushed right (Safari sizes a shrunk line by its text's
+     full one-line width, so moving the line itself doesn't reach the edge there) */
   .topic--end {
-    align-self: flex-end;
+    justify-content: flex-end;
     margin-top: -20px;
   }
 
