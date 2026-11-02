@@ -70,10 +70,8 @@ function placeBag() {
 
   if (isPhone.matches) {
     bag.style.bottom = ''
-    const box = bag.getBoundingClientRect()
-    const scale = box.width / bag.offsetWidth
-    // In the bag's own units, from its bottom edge; unclipped while the black is below it
-    const cut = (box.bottom - blackTop) / scale
+    // From the bag's bottom edge; unclipped while the black is below it
+    const cut = bag.getBoundingClientRect().bottom - blackTop
     bag.style.setProperty('--bag-cut', cut > 0 ? `${cut}px` : '')
     if (blackTop < window.innerHeight) openBag(false)  // the poster goes back once the black shows
     return

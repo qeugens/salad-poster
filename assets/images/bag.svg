@@ -1,10 +1,12 @@
-<svg width="110" height="161" viewBox="0 0 110 161" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<path d="M0 2C0 0.895434 0.895431 0 2 0H25.75C26.8546 0 27.75 0.895431 27.75 2V55.4815C27.75 56.5861 28.6454 57.4815 29.75 57.4815H54.5H80.25C81.3546 57.4815 82.25 56.5861 82.25 55.4815V2C82.25 0.895428 83.1454 0 84.25 0H108C109.105 0 110 0.895431 110 2V159C110 160.105 109.105 161 108 161H2C0.895429 161 0 160.105 0 159L0 2Z" fill="url(#pattern0_234_2468)"/>
-<defs>
-<pattern id="pattern0_234_2468" patternUnits="userSpaceOnUse" patternTransform="matrix(32.86 0 0 16.43 38.57 72.285)" preserveAspectRatio="none" viewBox="0 0 62 31" width="1" height="1">
-<g id="pattern0_234_2468_inner">
-<rect width="31" height="31" fill="#FF9633"/>
-<rect x="31" width="31" height="31" fill="#F74980"/>
+<svg width="110" height="161" viewBox="0 0 110 161" fill="none" xmlns="http://www.w3.org/2000/svg">
+<clipPath id="bag-shape">
+<path d="M0 2C0 0.895434 0.895431 0 2 0H25.75C26.8546 0 27.75 0.895431 27.75 2V55.4815C27.75 56.5861 28.6454 57.4815 29.75 57.4815H54.5H80.25C81.3546 57.4815 82.25 56.5861 82.25 55.4815V2C82.25 0.895428 83.1454 0 84.25 0H108C109.105 0 110 0.895431 110 2V159C110 160.105 109.105 161 108 161H2C0.895429 161 0 160.105 0 159L0 2Z"/>
+</clipPath>
+<g clip-path="url(#bag-shape)">
+<rect width="110" height="161" fill="#F74980"/>
+<rect x="5.71" width="16.43" height="161" fill="#FF9633"/>
+<rect x="38.57" width="16.43" height="161" fill="#FF9633"/>
+<rect x="71.43" width="16.43" height="161" fill="#FF9633"/>
+<rect x="104.29" width="16.43" height="161" fill="#FF9633"/>
 </g>
-</pattern></defs>
 </svg>

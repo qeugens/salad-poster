@@ -1205,37 +1205,68 @@ input[type="submit"] {
 
 /* Phones: the bag sits in the middle of the screen's bottom edge, 130px wide (Figma frame
    "iPhone 13 & 14 - 2"), its top 116.74px above the bottom of the screen and the rest
-   hidden below it. It is the desktop bag scaled from its top centre; it opens on tap.
-   The poster grows to the screen width (less the margins, and short enough to fit above
-   the bag), centred on the screen, its bottom edge 27px above the bag. The black ending
-   slides over the bag: the part below its top edge is cut away (--bag-cut, set in JS) */
+   hidden below it. Its parts are set at that size (scaling the bag instead blurs it in
+   Safari); it opens on tap. The poster grows to the screen width (less the margins, and
+   short enough to fit above the bag), centred on the screen, its bottom edge 27px above
+   the bag. The black ending slides over the bag: the part below its top edge is cut
+   away (--bag-cut, set in JS) */
 @media (max-width: 430px) {
   .bag {
-    --bag-scale: calc(130 / 110);
     --bag-peek: 116.74px;   /* how much of the bag shows above the bottom of the screen */
     --poster-gap: 27px;     /* open poster's bottom edge -> the bag's top */
-    /* Open poster width on screen; on short screens no taller than fits above the bag
-       up to 8px below the top of the screen */
+    /* Open poster width; on short screens no taller than fits above the bag up to 8px
+       below the top of the screen */
     --poster-w: min(100vw - 2 * var(--margin), (100dvh - var(--bag-peek) - var(--poster-gap) - 8px) * 0.75);
 
-    left: calc(50% - 110px / 2);
-    bottom: calc(var(--bag-peek) - 187px);
-    width: 110px;
-    scale: var(--bag-scale);
-    transform-origin: 50% 0;
+    left: calc(50% - 130px / 2);
+    bottom: calc(var(--bag-peek) - 221px);
+    width: 130px;
+    height: 221px;
     clip-path: inset(-100vh -100vw var(--bag-cut, -100vh) -100vw);
+  }
+
+  .bag__poster {
+    left: 2.364px;
+    width: 125.568px;
+    height: 167.424px;
+  }
+
+  .bag__body {
+    top: 30.727px;
+    width: 130px;
+    height: 190.273px;
   }
 
   .bag__sale {
     display: none;
   }
 
-  /* In the bag's own (scaled) units, so on screen it is --poster-w wide */
+  .bag__burst {
+    top: 187.909px;
+    left: 95.727px;
+    letter-spacing: -0.508px;
+  }
+
+  .bag__burst-shape {
+    top: calc(50% - 0.674px);
+    left: calc(50% + 1.584px);
+    width: 104px;
+    height: 83.909px;
+  }
+
+  .bag__burst-big {
+    font-size: 37.818px;
+  }
+
+  .bag__burst-small {
+    font-size: 16.545px;
+  }
+
   .bag.is-open .bag__poster {
-    top: calc((0px - var(--poster-gap) - var(--poster-w) * 4 / 3) / var(--bag-scale));
-    left: calc((110px - var(--poster-w) / var(--bag-scale)) / 2);
-    width: calc(var(--poster-w) / var(--bag-scale));
-    height: calc(var(--poster-w) * 4 / 3 / var(--bag-scale));
+    top: calc(0px - var(--poster-gap) - var(--poster-w) * 4 / 3);
+    left: calc((130px - var(--poster-w)) / 2);
+    width: var(--poster-w);
+    height: calc(var(--poster-w) * 4 / 3);
   }
 }
 
@@ -1335,8 +1366,9 @@ input[type="submit"] {
     transform: matrix(-0.96593, -0.25882, -0.25882, 0.96593, 0, 0);
   }
 
+  /* Above every letter, even a lit one (10) */
   .title__tomato {
-    z-index: 7;
+    z-index: 11;
     left: 79.412%;
     top: 83.823%;
     width: 17.161%;
