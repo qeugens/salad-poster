@@ -103,24 +103,30 @@ body::after {
   background-position: 0 100%;
 }
 
-/* A 1px black strip pinned to the top of the screen on touch devices. Safari 26 ignores
-   theme-color and tints the status bar from a fixed element at the top edge instead
-   (pseudo-elements don't count). It sits under the status bar, so it isn't seen */
+/* A black strip pinned to the top of the screen on iOS. Safari 26 ignores theme-color and
+   paints the status bar from a fixed element at the top edge instead (pseudo-elements don't
+   count, and it needs 5px or more); without one it shows the page faded under the bar.
+   Safari reads it as the page loads and keeps the colour, so the strip is then clipped away
+   (.is-hidden) while the zigzag is at the top, where it would cover the teeth */
 .status-tint {
   display: none;
 }
 
-@media (pointer: coarse) {
+@supports (-webkit-touch-callout: none) {
   .status-tint {
     display: block;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 1px;
+    height: 6px;
     z-index: 10000;
     background: #000;
     pointer-events: none;
+  }
+
+  .status-tint.is-hidden {
+    clip-path: inset(0 0 100% 0);
   }
 }
 

@@ -35,6 +35,26 @@ document.addEventListener('keydown', event => {
   save(name, !overlay[name].hidden)
 })
 
+// Status bar strip (iOS): Safari takes the bar colour from it while the page loads, then
+// it hides while the white sheet is still below the zigzag, so it never covers the teeth
+const statusTint = document.querySelector('.status-tint')
+const page = document.querySelector('.page')
+const STATUS_TINT_H = 6
+const STATUS_TINT_READ_MS = 500  // after load, time for Safari to read the colour
+
+function placeStatusTint() {
+  const sheetTop = page.getBoundingClientRect().top + parseFloat(getComputedStyle(page).paddingTop)
+  statusTint.classList.toggle('is-hidden', sheetTop >= STATUS_TINT_H)
+}
+
+if (statusTint && page) {
+  window.addEventListener('load', () => setTimeout(() => {
+    placeStatusTint()
+    window.addEventListener('scroll', placeStatusTint, { passive: true })
+    window.addEventListener('resize', placeStatusTint)
+  }, STATUS_TINT_READ_MS))
+}
+
 // Shopping bag: fixed 24px above the bottom of the screen, but it never goes onto the
 // black ending. Once the black section comes close, the bag stops 100px above it
 // and scrolls away with the page.
