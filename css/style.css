@@ -308,6 +308,12 @@ input[type="submit"] {
   --hold-ms: var(--swap-delay);
 }
 
+/* Phone-only art (see the phone section) */
+.title__swoosh,
+.title__tomato {
+  display: none;
+}
+
 .workshop {
   display: flex;
   flex-direction: column;
@@ -1024,7 +1030,7 @@ input[type="submit"] {
   transform: rotateY(180deg);
 }
 
-.bag:hover .bag__poster {
+.bag.is-open .bag__poster {
   /* A bit bigger than in Figma (471 x 628), keeping the same bottom edge and centre */
   top: -654px;
   left: -195.5px;
@@ -1039,7 +1045,7 @@ input[type="submit"] {
     transition-duration: 0.01s;
   }
 
-  .bag:hover .bag__poster {
+  .bag.is-open .bag__poster {
     transform: none;
   }
 
@@ -1047,9 +1053,9 @@ input[type="submit"] {
     transition: none;
   }
 
-  .bag:hover .bag__body,
-  .bag:hover .bag__sale,
-  .bag:hover .bag__burst {
+  .bag.is-open .bag__body,
+  .bag.is-open .bag__sale,
+  .bag.is-open .bag__burst {
     animation: none;
   }
 
@@ -1094,9 +1100,9 @@ input[type="submit"] {
 }
 
 /* The moment the bag is hovered it hops: up and straight back down in 200ms */
-.bag:hover .bag__body,
-.bag:hover .bag__sale,
-.bag:hover .bag__burst {
+.bag.is-open .bag__body,
+.bag.is-open .bag__sale,
+.bag.is-open .bag__burst {
   animation: bag-hop 200ms cubic-bezier(0.3, 0, 0.3, 1);
 }
 
@@ -1126,7 +1132,7 @@ input[type="submit"] {
 }
 
 /* The badge springs up a little and turns 5deg while the bag is hovered */
-.bag:hover .bag__burst {
+.bag.is-open .bag__burst {
   scale: 1.28;
   rotate: 5deg;
 }
@@ -1154,10 +1160,400 @@ input[type="submit"] {
   font-size: 14px;
 }
 
-/* Phones get their own design later: no fixed bag there for now */
-@media (max-width: 767px) {
+/* Tablets get their own design later: no fixed bag there for now */
+@media (min-width: 431px) and (max-width: 767px) {
   .bag {
     display: none;
+  }
+}
+
+/* Phones: the bag sits in the middle of the screen's bottom edge and opens on tap.
+   The poster grows to the screen width (less the margins, and short enough to fit
+   above the bag), centred on the screen, with the same bottom edge as on desktop */
+@media (max-width: 430px) {
+  .bag {
+    --poster-lift: 40px; /* how much higher than on desktop the poster's bottom edge goes */
+    /* Short screens: no taller than fits between the bag and 8px below the screen top */
+    --poster-w: min(100vw - 2 * var(--margin), (100dvh - 206px - var(--poster-lift)) * 0.75);
+
+    /* Centred on the bag itself (110px wide); the star sticks out to the right */
+    left: calc(50% - 110px / 2);
+    width: 110px;
+    /* A 6px white outline around the whole bag, like the star's; the star and the
+       open poster sit on top of it */
+    outline: 6px solid var(--color-bg);
+  }
+
+  .bag__sale {
+    display: none;
+  }
+
+  .bag.is-open .bag__poster {
+    top: calc(13px - var(--poster-lift) - var(--poster-w) * 4 / 3);
+    left: calc((110px - var(--poster-w)) / 2);
+    width: var(--poster-w);
+    height: calc(var(--poster-w) * 4 / 3);
+  }
+}
+
+/* Phones (up to 430px, the widest iPhone): Figma frame "iPhone 13 & 14" (390px).
+   Everything spans the full width and stacks; vertical spacing stays as on desktop */
+@media (max-width: 430px) {
+  /* On the narrowest phones the big ORDER ellipse is wider than the screen */
+  .page {
+    overflow-x: clip;
+  }
+
+  .title,
+  .workshop,
+  .stack {
+    grid-column: 1 / -1;
+  }
+
+  /* Spacing from the mobile frame (390px, y from the top of the screen): the white
+     sheet from y 56, title box from y 88, the strip's rules at y 231 and 266, content from y 348 */
+  :root {
+    --hero-top: 32px;
+    --hero-gap: 40.4px;
+    --content-top: 61.7px;
+  }
+
+  /* The page is a white sheet on the black canvas, torn into a zigzag along the top */
+  .page {
+    position: relative;
+    margin-top: 56px;
+  }
+
+  .page::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    width: 100%;
+    height: 11.1px;
+    background: url("../assets/images/zigzag.svg") 0 0 / 100% 100%;
+  }
+
+  /* SALAD: the letters are bigger and shuffled from the desktop places, each with an
+     8px white outline, stacked s, swoosh, A, L, a, d, tomato from back to front.
+     Each letter SVG moves and scales around its letter's old top-left corner; the
+     percentages are of the title box (374 x 102.6 at 390px), so it all scales together */
+  .title__word {
+    transform-origin: var(--ox) var(--oy);
+    transform: translate(var(--dx), var(--dy)) scale(1.10444);
+  }
+
+  .title__word:nth-child(1) { --ox: 0%; --oy: 10.431%; --dx: 0%; --dy: 2.423%; z-index: 1; }
+  .title__word:nth-child(2) { --ox: 14.555%; --oy: 13.87%; --dx: -0.652%; --dy: 6.197%; z-index: 5; }
+  .title__word:nth-child(3) { --ox: 33.154%; --oy: 6.01%; --dx: -0.957%; --dy: 1.916%; z-index: 4; }
+  .title__word:nth-child(4) { --ox: 56.739%; --oy: -14.133%; --dx: -0.394%; --dy: -2.336%; z-index: 3; }
+  .title__word:nth-child(5) { --ox: 75.337%; --oy: 8.466%; --dx: -1.506%; --dy: 5.531%; z-index: 6; }
+
+  /* No tap animation on phones: the letters ignore touches (the load wave replays instead) */
+  .title__letter {
+    pointer-events: none;
+  }
+
+  /* Stronger than the per-letter order above, so the hovered letter comes to the front */
+  .title .title__word:hover,
+  .title .title__word.is-lit {
+    z-index: 10;
+  }
+
+  /* 8px on screen, outside the letter (the SVG units are scaled down to ~0.56) */
+  .title__letter > text {
+    stroke: var(--color-bg);
+    stroke-width: 28.66px;
+    stroke-linejoin: round;
+    paint-order: stroke;
+  }
+
+  .title__swoosh,
+  .title__tomato {
+    display: block;
+    position: absolute;
+    max-width: none;
+    height: auto;
+    pointer-events: none;
+  }
+
+  /* Figma: rotated 165deg and flipped, turning around its top-left corner */
+  .title__swoosh {
+    z-index: 2;
+    left: 87.199%;
+    top: 116.54%;
+    width: 85.969%;
+    transform-origin: 1.248% 4.432%;
+    transform: matrix(-0.96593, -0.25882, -0.25882, 0.96593, 0, 0);
+  }
+
+  .title__tomato {
+    z-index: 7;
+    left: 76.471%;
+    top: 87.719%;
+    width: 17.161%;
+  }
+
+  /* Strip: rules 35px apart, the label 19px under the first */
+  .workshop__label {
+    margin-block: -0.66px -7px;
+  }
+
+  /* Callout -> "экспериментируем с" */
+  .intro {
+    gap: 35px;
+  }
+
+  /* Topics -> callout */
+  .callout {
+    margin-top: -8px;
+  }
+
+  /* The two topic lines stack, the second tucked 20px up (both start at the left) */
+  .topics {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .topic--end {
+    margin-top: -20px;
+  }
+
+  .topic__text {
+    flex: 0 1 330px;
+    width: auto;
+  }
+
+  .callout__text {
+    width: auto;
+  }
+
+  /* The words sit further right than on desktop and almost touch the rules:
+     the left rule's share of the row is taken from the mobile frame (of 374px) */
+  .experiments__list li {
+    gap: 2px;
+  }
+
+  .experiments__list li:nth-child(1) .rule:first-child { flex: none; width: 44.4%; }
+  .experiments__list li:nth-child(2) .rule:first-child { flex: none; width: 48.8%; }
+  .experiments__list li:nth-child(3) .rule:first-child { flex: none; width: 54.15%; }
+  .experiments__list li:nth-child(4) .rule:first-child { flex: none; width: 58.15%; }
+
+  /* "разрозненных ингредиентов" gets its own line, the rule and dish go below */
+  .result__row {
+    flex-wrap: wrap;
+    row-gap: 0;
+    margin-top: 0;
+  }
+
+  .result__row > span:first-child {
+    flex-basis: 100%;
+  }
+
+  .week__head {
+    height: auto;
+  }
+
+  .week__title--center {
+    align-items: center;
+  }
+
+  /* Week titles, set like the topics at the top: "[ first part" on one line, then
+     "the rest ]" right-aligned on the next, its 60px row starting 24px lower, no rule.
+     The brackets and both parts sit straight in a grid (the wrappers step aside) */
+  .week__head--split {
+    display: grid;
+    grid-template-columns: 27px 1fr 27px;
+    grid-template-rows: 24px 36px 24px;
+    gap: 0 4px;
+    align-items: center;
+  }
+
+  .week__head--split .week__heading,
+  .week__head--split .week__title {
+    display: contents;
+  }
+
+  .week__head--split .rule {
+    display: none;
+  }
+
+  .week__head--split .week__bracket {
+    width: auto;
+    padding-bottom: 6px;
+    font-size: 54px;
+    line-height: 54px;
+  }
+
+  .week__head--split .week__bracket:first-child {
+    grid-area: 1 / 1 / 3 / 2;
+  }
+
+  .week__head--split .week__bracket:last-child {
+    grid-area: 2 / 3 / 4 / 4;
+  }
+
+  .week__title span:first-child {
+    grid-area: 1 / 2 / 3 / 4;
+  }
+
+  .week__title span:last-child {
+    grid-area: 2 / 1 / 4 / 3;
+    justify-self: end;
+    max-width: 330px;
+    text-align: right;
+  }
+
+  /* A title that wraps onto two lines starts 10px lower, clear of the first part */
+  .week__head--tall {
+    grid-template-rows: 24px 36px 34px;
+  }
+
+  .week__head--tall .week__bracket:last-child,
+  .week__head--tall .week__title span:last-child {
+    margin-top: 10px;
+  }
+
+  .day__details {
+    width: 100%;
+  }
+
+  /* Week 2: the day blocks shrink to 82px and sit beside the text,
+     6px shorter than it (as on desktop) */
+  .wday {
+    align-items: stretch;
+    height: auto;
+  }
+
+  .wday__name,
+  .wday__range span {
+    width: 82px;
+    height: auto;
+    font-size: 81px;
+    text-indent: calc(-0.029em + var(--nudge, 0px) / 3);
+  }
+
+  .wday__name {
+    flex-shrink: 0;
+    margin-bottom: 6px;
+  }
+
+  @supports (text-box: trim-both cap alphabetic) {
+    .wday__name {
+      padding-top: 4px;
+    }
+
+    .wday__range span {
+      padding-top: 0;
+    }
+  }
+
+  .wday__body {
+    flex: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    width: auto;
+    height: auto;
+    min-height: 157px;
+    gap: 18px;
+  }
+
+  .wday__note,
+  .wday__title,
+  .wday__below .wday__note {
+    width: auto;
+  }
+
+  .wday__title {
+    font-size: 41px;
+    overflow-wrap: anywhere;
+  }
+
+  .wday__end::after,
+  .wday__below::after {
+    overflow: hidden;
+  }
+
+  /* вт - чт: the letters stack in one black column, the details beside it */
+  .wday--span {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .wday__range {
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 3.475px;
+    width: 82px;
+    margin-bottom: 7px;
+    padding: 4px 0;
+  }
+
+  .wday__range span:nth-child(2) {
+    height: 69px;
+  }
+
+  .wday__below {
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .wday__below::after {
+    flex-basis: auto;
+    margin-inline: 0;
+  }
+
+  /* The title drops to the bottom, onto the dashed rule */
+  .wday__wide {
+    flex: none;
+    height: auto;
+    margin-top: auto;
+    padding-top: 18px;
+  }
+
+  .wday__art {
+    display: none;
+  }
+
+  .crew {
+    flex-direction: column;
+  }
+
+  /* Buy: no bags beside ORDER; the buy button, QR and ask button become squares */
+  .buy__bag {
+    display: none;
+  }
+
+  .buy__top {
+    justify-content: center;
+  }
+
+  .buy__pay {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .buy__link,
+  .ask {
+    flex: none;
+    aspect-ratio: 1;
+  }
+
+  /* No QR on phones: the ask button sits right under the buy button */
+  .buy__qr {
+    display: none;
+  }
+
+  .buy__pay + .ask {
+    margin-top: -16px;
+  }
+
+  .ask {
+    height: auto;
+    padding: 20px;
+    text-align: center;
   }
 }
 

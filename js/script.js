@@ -55,6 +55,33 @@ if (bag && blackout) {
   window.addEventListener('resize', placeBag)
 }
 
+// The poster comes out of the bag (.is-open): on hover on desktop, on tap on phones.
+// A tap on the bag again, anywhere else, or Escape puts it back.
+const isPhone = matchMedia('(max-width: 430px)')
+
+function openBag(isOpen) {
+  bag.classList.toggle('is-open', isOpen)
+}
+
+if (bag) {
+  bag.addEventListener('mouseenter', () => !isPhone.matches && openBag(true))
+  bag.addEventListener('mouseleave', () => !isPhone.matches && openBag(false))
+
+  bag.addEventListener('click', () => {
+    if (isPhone.matches) openBag(!bag.classList.contains('is-open'))
+  })
+
+  document.addEventListener('click', event => {
+    if (!bag.contains(event.target)) openBag(false)
+  })
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') openBag(false)
+  })
+
+  isPhone.addEventListener('change', () => openBag(false))
+}
+
 // SALAD title: right after load the letters flash their hover look one after another,
 // left to right, in under a second. Skipped for reduced motion.
 const title = document.querySelector('.title')
@@ -75,6 +102,12 @@ function waveTitle() {
   setTimeout(() => title.classList.remove('is-waving'), end)
 }
 
+// On phones the letters don't react to taps; the wave replays every few seconds instead
+const WAVE_REPEAT_MS = 8000
+
 if (title && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
   document.fonts.ready.then(waveTitle)
+  setInterval(() => {
+    if (isPhone.matches && !document.hidden) waveTitle()
+  }, WAVE_REPEAT_MS)
 }
