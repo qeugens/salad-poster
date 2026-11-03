@@ -241,7 +241,7 @@ function waveTitle() {
   setTimeout(() => title.classList.remove('is-waving'), end)
 }
 
-// On phones the wave also replays every few seconds; a tap plays a letter's hover look too
+// On phones the wave also replays every few seconds
 const WAVE_REPEAT_MS = 8000
 
 if (title && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -249,4 +249,29 @@ if (title && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
   setInterval(() => {
     if (isPhone.matches && !document.hidden) waveTitle()
   }, WAVE_REPEAT_MS)
+}
+
+// A tap on a letter plays its hover look for a moment, then it goes back by itself.
+// Cancelling the touch stops the browser's own tap-hover, which would stay until the next
+// tap somewhere else. A touch that moves (a scroll) doesn't count as a tap
+const TAP_LIT_MS = 600
+const TAP_MOVE_PX = 10
+let tapStart = null
+
+if (title) {
+  title.addEventListener('touchstart', event => {
+    const touch = event.touches[0]
+    tapStart = { x: touch.clientX, y: touch.clientY }
+  }, { passive: true })
+
+  title.addEventListener('touchend', event => {
+    const word = event.target.closest('.title__word')
+    const touch = event.changedTouches[0]
+    if (!word || !tapStart) return
+    if (Math.hypot(touch.clientX - tapStart.x, touch.clientY - tapStart.y) > TAP_MOVE_PX) return
+    event.preventDefault()
+    word.classList.add('is-lit')
+    clearTimeout(word.tapTimer)
+    word.tapTimer = setTimeout(() => word.classList.remove('is-lit'), TAP_LIT_MS)
+  })
 }
