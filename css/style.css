@@ -1484,8 +1484,14 @@ input[type="submit"] {
     flex-basis: 100%;
   }
 
+  /* As close to what follows as the topics are to the callout: 19px from the lowest ink
+     to the content (the week titles' grid and the by-who rule leave room under the text) */
   .week__head {
-    margin-bottom: 0;
+    margin-bottom: -11px;
+  }
+
+  .week__head--split {
+    margin-bottom: -19px;
   }
 
   .week__title--center {
@@ -1552,8 +1558,8 @@ input[type="submit"] {
     width: 100%;
   }
 
-  /* Week 2: the day blocks shrink to 82px and sit beside the text, ending where it ends.
-     Each row's dashed rule runs the full width, like сб - чилл, 14px under the block */
+  /* Week 2: the day blocks shrink to 82px and sit beside the text, 6px shorter than it
+     (as on desktop); the dashed rule runs under the text only */
   .wday {
     align-items: stretch;
     margin-bottom: 0;
@@ -1569,7 +1575,7 @@ input[type="submit"] {
 
   .wday__name {
     flex-shrink: 0;
-    margin-bottom: 34px; /* the rule's 14px gap + its 20px line */
+    margin-bottom: 6px;
   }
 
   @supports (text-box: trim-both cap alphabetic) {
@@ -1598,6 +1604,10 @@ input[type="submit"] {
     width: auto;
   }
 
+  .wday__sub {
+    margin-top: 6px;
+  }
+
   .wday__title {
     font-size: 41px;
     line-height: 40px;
@@ -1615,7 +1625,7 @@ input[type="submit"] {
     flex-shrink: 0;
     gap: 3.475px;
     width: 82px;
-    margin-bottom: 34px;
+    margin-bottom: 7px;
     padding: 4px 0;
   }
 
@@ -1630,14 +1640,15 @@ input[type="submit"] {
     flex-wrap: nowrap;
   }
 
+  /* Long enough to reach the right edge on wide phones and small tablets too */
   .wday__end::after,
   .wday__below::after {
     content: "------------------------------------------------------------------------------------------------------------------------------------------------------";
-    margin: 14px 0 0 calc(-82px - 16px);
   }
 
   .wday__below::after {
     flex-basis: auto;
+    margin-inline: 0;
   }
 
   /* The title drops to the bottom, onto the dashed rule */
