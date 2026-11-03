@@ -53,7 +53,7 @@ img {
   --hero-top: 64px;       /* page top -> title */
   --hero-gap: 12px;       /* title -> workshop strip */
   --content-top: 40px;    /* workshop strip -> content */
-  --stack-gap: 100px;     /* auto layout gap between page sections */
+  --stack-gap: 80px;      /* auto layout gap between page sections and stickers */
 }
 
 /* Black behind the page, with a + pattern on a layer pinned to the screen. Browsers paint
@@ -528,47 +528,54 @@ input[type="submit"] {
   line-height: 20px;
 }
 
-/* ORDER NOW bubble: a tilted ellipse behind two lines of white text */
-/* ORDER NOW sticker: 20px more room above and below than the stack's own gap */
+/* Order stickers (Figma SVGs: Today sale, Order now!!!, Oh what a deal), centred,
+   the stack's 80px gap above and below.
+   The box is the sticker's Figma group; the SVG's outlines spill past it a little, so
+   the art is placed by its offset from the group, in % so it scales on narrow phones. */
 .order {
+  --w: 267.095;
+  --h: 147.968;
+  --art-x: 0;
+  --art-y: 0;
+  --art-w: var(--w);
+  --art-h: var(--h);
   position: relative;
   align-self: center;
-  margin-block: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 129px;
-  color: var(--color-bg);
-  text-decoration: none;
+  display: block;
+  width: min(calc(var(--w) * 1px), 100%);
+  aspect-ratio: var(--w) / var(--h);
 }
 
-.order__shape {
+.order__art {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 161px;
-  height: 94px;
+  left: calc(var(--art-x) / var(--w) * 100%);
+  top: calc(var(--art-y) / var(--h) * 100%);
+  width: calc(var(--art-w) / var(--w) * 100%);
+  height: calc(var(--art-h) / var(--h) * 100%);
   max-width: none;
-  transform: translate(calc(-50% - 0.79px), calc(-50% - 5.32px)) rotate(-12deg);
 }
 
-.order__main,
-.order__sub {
-  position: relative;
+.order--order-now {
+  --w: 329.866;
+  --h: 177.08;
+  --art-x: -0.434;
+  --art-w: 336.008;
+  --art-h: 177.515;
 }
 
-.order__main {
-  margin-bottom: -4px;
-  font-family: var(--font-alpha54);
-  font-size: 40px;
-  line-height: 40px;
+.order--today-sale {
+  --w: 283.946;
+  --h: 155.76;
+  --art-x: -4.596;
+  --art-w: 293.132;
 }
 
-.order__sub {
-  font-weight: 400;
-  font-size: 20px;
-  line-height: 16px;
-  letter-spacing: -0.02em;
+.order--deal {
+  --w: 283.83;
+  --h: 184.447;
+  --art-x: -8.672;
+  --art-w: 293;
+  --art-h: 185;
 }
 
 /* Week sections */
@@ -966,76 +973,24 @@ input[type="submit"] {
   width: 100%;
 }
 
+/* Big order: the GO sticker with the 130 € burst, one Figma SVG. 20px more room above
+   than the other blocks. The box is Figma's 740 x 208.7 frame; the burst spills 65px
+   past its right edge, as in Figma */
 .buy__top {
-  display: flex;
-  justify-content: center;
+  padding-top: 20px;
 }
 
-/* Big ORDER: ellipse behind the word, a price starburst hanging below */
 .big-order {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 264px;
-  height: 270px;
-  padding-top: 60px;
-  color: var(--color-bg);
-  text-decoration: none;
+  display: block;
+  width: 100%;
+  aspect-ratio: 740 / 208.713;
 }
 
-.big-order__shape {
-  position: absolute;
-  /* Figma: centred on the ORDER block (60px padding + 82px word), then 28px lower */
-  top: calc((60px + 82px) / 2 + 28.24px);
-  left: calc(50% + 0.49px);
-  width: 329px;
-  height: 192px;
+.big-order__art {
+  display: block;
+  width: calc(805 / 740 * 100%);
   max-width: none;
-  transform: translate(-50%, -50%) rotate(-12deg);
-}
-
-.big-order__word {
-  position: relative;
-  font-family: var(--font-alpha54);
-  font-size: 82px;
-  line-height: 82px;
-}
-
-.big-order__price {
-  position: absolute;
-  top: 178.5px;
-  left: 95.3px;
-  display: flex;
-  align-items: flex-start;
-  font-family: var(--font-arial-narrow);
-  font-style: italic;
-  line-height: 0.77;
-  letter-spacing: -0.88px;
-  text-transform: none;
-}
-
-.big-order__burst {
-  position: absolute;
-  top: calc(50% + 0.61px);
-  left: calc(50% + 10.16px);
-  width: 289px;
-  height: 135px;
-  max-width: none;
-  transform: translate(-50%, -50%) rotate(-11.6deg);
-}
-
-.big-order__amount,
-.big-order__currency {
-  position: relative;
-}
-
-.big-order__amount {
-  font-size: 65px;
-}
-
-.big-order__currency {
-  font-size: 29px;
+  height: auto;
 }
 
 /* The buy link and the QR split the row and stay square as it narrows; the label gets
@@ -1080,7 +1035,7 @@ input[type="submit"] {
 .ask {
   display: grid;
   place-items: center;
-  height: 152px;
+  height: 200px;
   border: 2px solid var(--color-text);
   color: var(--color-text);
   font-size: 46px;
@@ -1675,6 +1630,18 @@ input[type="submit"] {
 
   .crew {
     flex-direction: column;
+  }
+
+  /* Phone big order: its own SVG, a bigger GO with the burst under it. The box is the
+     373 x 298 art (it spills 7px past the right edge); the burst's tip stops ~1px above
+     the buy button */
+  .big-order {
+    aspect-ratio: 373 / 298;
+    margin-bottom: -15px;
+  }
+
+  .big-order__art {
+    width: calc(380 / 373 * 100%);
   }
 
   /* Buy: the buy button and ask button stack as squares */
