@@ -61,7 +61,7 @@ if (statusTint && page) {
 // over it instead: everything below the black section's top edge is cut away.
 const bag = document.querySelector('.bag')
 const blackout = document.querySelector('.blackout')
-const isPhone = matchMedia('(max-width: 430px)')
+const isPhone = matchMedia('(max-width: 770px)')
 const BAG_SCREEN_GAP = 24  // from the bottom of the screen
 const BAG_BLACK_GAP = 100  // from the top of the black section
 
@@ -112,6 +112,25 @@ if (bag) {
   })
 
   isPhone.addEventListener('change', () => openBag(false))
+}
+
+// Week 2 rows: the text column is as tall as the day block beside it. If its text doesn't
+// fit, the note's +++ goes (.is-tight); if it still doesn't fit, the column grows (.is-tall)
+const dayBodies = document.querySelectorAll('.wday__body')
+
+function fitDayBodies() {
+  for (const body of dayBodies) {
+    body.classList.remove('is-tight', 'is-tall')
+    const overflows = () => body.scrollHeight > body.clientHeight + 0.5
+    if (overflows()) body.classList.add('is-tight')
+    if (overflows()) body.classList.add('is-tall')
+  }
+}
+
+if (dayBodies.length) {
+  fitDayBodies()
+  document.fonts.ready.then(fitDayBodies)
+  new ResizeObserver(fitDayBodies).observe(document.querySelector('.week__days--big'))
 }
 
 // SALAD title: right after load the letters flash their hover look one after another,

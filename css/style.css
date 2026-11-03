@@ -180,7 +180,12 @@ input[type="submit"] {
   cursor: var(--cursor-link);
 }
 
+/* Nothing pokes out sideways into a horizontal scroll (on phones the big ORDER ellipse
+   is wider than the screen; on tablets the crew cards don't fit yet). clip, unlike
+   hidden, doesn't turn the page into its own scroll box; hidden is the fallback */
 .page {
+  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100vh;
   background: var(--color-bg);
   padding-bottom: 98px;  /* Figma frame ends 98px below the content */
@@ -410,9 +415,12 @@ input[type="submit"] {
   gap: var(--gutter);
 }
 
+/* The two topics sit at the ends of the row; as it narrows, the space between them
+   shrinks first (down to the gutter), then their text gets narrower and wraps */
 .topic {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 4px;
   font-weight: 500;
   font-size: 23px;
@@ -421,7 +429,8 @@ input[type="submit"] {
 }
 
 .topic__text {
-  width: 330px;
+  flex: 0 1 330px;
+  min-width: 0;
 }
 
 .topic--end {
@@ -541,8 +550,9 @@ input[type="submit"] {
 .week__head {
   display: flex;
   align-items: flex-start;
-  /* 40px in Figma: the = rule under the title overflows it */
-  height: 40px;
+  /* 40px in Figma: the = rule under the title overflows it by 3px. It grows when a
+     narrow screen wraps the title */
+  margin-bottom: -3px;
   gap: 4px;
 }
 
@@ -575,6 +585,20 @@ input[type="submit"] {
 
 .week__title--center {
   justify-content: center;
+}
+
+/* Week titles with two parts: they close up as the row narrows. The second part wraps
+   first, set against the right bracket; the first keeps its line until the second can't
+   get any narrower (a grid: the first column grows to its full width only out of what
+   the second doesn't need for its longest word) */
+.week__title:not(.week__title--center) {
+  display: grid;
+  grid-template-columns: minmax(min-content, max-content) minmax(min-content, 1fr);
+}
+
+.week__title span:last-child:not(:first-child) {
+  justify-self: end;
+  text-align: right;
 }
 
 .week__heading .rule {
@@ -635,7 +659,7 @@ input[type="submit"] {
   flex-direction: column;
   align-items: center;
   gap: 1px;
-  width: 488px;
+  width: min(488px, 100%);
 }
 
 .day__list {
@@ -658,27 +682,31 @@ input[type="submit"] {
   line-height: 20px;
 }
 
-/* Week 2: giant day letters on black blocks */
+/* Week 2: giant day letters on black blocks. As the page narrows the blocks shrink with
+   the row (236 x 180 at its full 740px) and the text beside them gets narrower and wraps */
 .week__days--big {
+  container-type: inline-size;
   gap: 36px;
 }
 
 .wday {
+  --wday-block: min(236px, 31.892cqw);
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  height: 180px;
+  /* The text column pokes 6px past the block; the row still counts as the block's height */
+  margin-bottom: -6px;
 }
 
 .wday__name,
 .wday__range span {
   display: block;
-  width: 236px;
-  height: 180px;
+  width: var(--wday-block);
+  height: calc(var(--wday-block) * 180 / 236);
   background: var(--color-text);
   color: var(--color-bg);
   font-weight: 500;
-  font-size: 243px;
+  font-size: calc(var(--wday-block) * 243 / 236);
   letter-spacing: var(--tracking, -0.07em);
   text-align: center;
   /* A letter pair is a little wider than the box, and CSS start-aligns overflowing
@@ -705,18 +733,30 @@ input[type="submit"] {
   }
 }
 
+/* As tall as the block beside it, plus the 6px the dashed rule hangs below it (Figma:
+   186 next to 180); the note sits at the top, the title at the bottom, with whatever
+   space is left between them. When the text doesn't fit, JS drops the note's +++
+   (.is-tight), and if that's still not enough lets the column grow (.is-tall) */
 .wday__body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  flex-shrink: 0;
-  width: 488px;
-  /* Fixed height from Figma, so every row lines up the same; it pokes 6px past the 180px block */
-  height: 186px;
+  flex: 0 1 488px;
+  min-width: 0;
+  height: calc(var(--wday-block) * 180 / 236 + 6px);
+}
+
+.wday__body.is-tight .wday__note::before {
+  display: none;
+}
+
+.wday__body.is-tall {
+  height: auto;
+  min-height: calc(var(--wday-block) * 180 / 236 + 6px);
 }
 
 .wday__note {
-  width: 362px;
+  max-width: 362px;
   line-height: 17px;
 }
 
@@ -738,17 +778,20 @@ input[type="submit"] {
   font-size: 20px;
   line-height: 20px;
   white-space: nowrap;
+  overflow: hidden;
 }
 
+/* 46px until the row gets narrower than ~575px, then smaller, so the longest words
+   still fit beside the shrinking blocks */
 .wday__title {
-  width: 362px;
+  max-width: 362px;
   font-weight: 500;
-  font-size: 46px;
-  line-height: 40px;
+  font-size: clamp(30px, 8cqw, 46px);
+  line-height: calc(1em * 40 / 46);
 }
 
 .wday__title--wide {
-  width: 100%;
+  max-width: none;
 }
 
 .wday__sub {
@@ -761,12 +804,12 @@ input[type="submit"] {
 .wday--span {
   flex-direction: column;
   align-items: stretch;
-  height: auto;
+  margin-bottom: 0;
 }
 
 .wday__range {
   display: flex;
-  gap: 16px;
+  gap: min(16px, 2.162cqw);
   background: var(--color-text);
 }
 
@@ -785,10 +828,12 @@ input[type="submit"] {
 
 .wday__below .wday__note {
   width: 235px;
+  max-width: 100%;
 }
 
+/* Beside the note while the title and drawing fit there (about 420px), else under it */
 .wday__wide {
-  flex: 1;
+  flex: 1 1 420px;
   height: 80px;
   display: flex;
   align-items: center;
@@ -812,9 +857,11 @@ input[type="submit"] {
   line-height: 20px;
 }
 
-/* By who: two outlined cards, one per studio */
+/* By who: two outlined cards, one per studio, side by side; once either can't fit its
+   longest word, they wrap into one column */
 .crew {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
 }
 
@@ -879,7 +926,7 @@ input[type="submit"] {
   text-decoration: underline;
 }
 
-/* Buy: bags + big ORDER, QR + buy link, ask button */
+/* Buy: big ORDER, buy link + QR, ask button */
 .buy {
   display: flex;
   flex-direction: column;
@@ -889,8 +936,7 @@ input[type="submit"] {
 
 .buy__top {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 /* Big ORDER: ellipse behind the word, a price starburst hanging below */
@@ -960,9 +1006,11 @@ input[type="submit"] {
   font-size: 29px;
 }
 
+/* The buy link and the QR split the row and stay square as it narrows; the label gets
+   smaller once the row is under ~430px, so it still fits its half */
 .buy__pay {
+  container-type: inline-size;
   display: flex;
-  height: 371px;
 }
 
 .buy__qr {
@@ -980,12 +1028,14 @@ input[type="submit"] {
 
 .buy__link {
   flex: 1;
+  min-width: 0;
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--color-text);
   color: var(--color-bg);
-  font-size: 46px;
+  font-size: min(46px, 10.5cqw);
   line-height: 40px;
   text-decoration: none;
 }
@@ -1003,6 +1053,7 @@ input[type="submit"] {
   color: var(--color-text);
   font-size: 46px;
   line-height: 40px;
+  text-align: center;
   text-decoration: none;
 }
 
@@ -1196,13 +1247,6 @@ input[type="submit"] {
   font-size: 14px;
 }
 
-/* Tablets get their own design later: no fixed bag there for now */
-@media (min-width: 431px) and (max-width: 767px) {
-  .bag {
-    display: none;
-  }
-}
-
 /* Phones: the bag sits in the middle of the screen's bottom edge, 130px wide (Figma frame
    "iPhone 13 & 14 - 2"), its top 116.74px above the bottom of the screen and the rest
    hidden below it. Its parts are set at that size (scaling the bag instead blurs it in
@@ -1210,7 +1254,7 @@ input[type="submit"] {
    short enough to fit above the bag), centred on the screen, its bottom edge 27px above
    the bag. The black ending slides over the bag: the part below its top edge is cut
    away (--bag-cut, set in JS) */
-@media (max-width: 430px) {
+@media (max-width: 770px) {
   .bag {
     --bag-peek: 116.74px;   /* how much of the bag shows above the bottom of the screen */
     --poster-gap: 27px;     /* open poster's bottom edge -> the bag's top */
@@ -1270,14 +1314,9 @@ input[type="submit"] {
   }
 }
 
-/* Phones (up to 430px, the widest iPhone): Figma frame "iPhone 13 & 14" (390px).
+/* Phones and small tablets (up to 770px): Figma frame "iPhone 13 & 14" (390px).
    Everything spans the full width and stacks; vertical spacing stays as on desktop */
-@media (max-width: 430px) {
-  /* On the narrowest phones the big ORDER ellipse is wider than the screen */
-  .page {
-    overflow-x: clip;
-  }
-
+@media (max-width: 770px) {
   .title,
   .workshop,
   .stack {
@@ -1403,11 +1442,6 @@ input[type="submit"] {
     margin-top: -20px;
   }
 
-  .topic__text {
-    flex: 0 1 330px;
-    width: auto;
-  }
-
   .callout__text {
     width: auto;
   }
@@ -1435,7 +1469,7 @@ input[type="submit"] {
   }
 
   .week__head {
-    height: auto;
+    margin-bottom: 0;
   }
 
   .week__title--center {
@@ -1506,7 +1540,7 @@ input[type="submit"] {
      6px shorter than it (as on desktop) */
   .wday {
     align-items: stretch;
-    height: auto;
+    margin-bottom: 0;
   }
 
   .wday__name,
@@ -1550,12 +1584,8 @@ input[type="submit"] {
 
   .wday__title {
     font-size: 41px;
+    line-height: 40px;
     overflow-wrap: anywhere;
-  }
-
-  .wday__end::after,
-  .wday__below::after {
-    overflow: hidden;
   }
 
   /* вт - чт: the letters stack in one black column, the details beside it */
@@ -1605,24 +1635,19 @@ input[type="submit"] {
     flex-direction: column;
   }
 
-  /* Buy: no bags beside ORDER; the buy button, QR and ask button become squares */
-  .buy__bag {
-    display: none;
-  }
-
-  .buy__top {
-    justify-content: center;
-  }
-
+  /* Buy: the buy button and ask button stack as squares */
   .buy__pay {
     flex-direction: column;
-    height: auto;
   }
 
   .buy__link,
   .ask {
     flex: none;
     aspect-ratio: 1;
+  }
+
+  .buy__link {
+    font-size: 46px;
   }
 
   /* No QR on phones: the ask button sits right under the buy button */
@@ -1637,7 +1662,6 @@ input[type="submit"] {
   .ask {
     height: auto;
     padding: 20px;
-    text-align: center;
   }
 }
 
