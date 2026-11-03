@@ -1436,7 +1436,7 @@ input[type="submit"] {
 
   /* Callout -> "экспериментируем с" */
   .intro {
-    gap: 35px;
+    gap: 50px;
   }
 
   /* Topics -> callout */
