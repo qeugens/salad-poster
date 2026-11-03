@@ -1536,8 +1536,8 @@ input[type="submit"] {
     width: 100%;
   }
 
-  /* Week 2: the day blocks shrink to 82px and sit beside the text,
-     6px shorter than it (as on desktop) */
+  /* Week 2: the day blocks shrink to 82px and sit beside the text. Each row's dashed rule
+     runs the full width, like сб - чилл, just under the block */
   .wday {
     align-items: stretch;
     margin-bottom: 0;
@@ -1553,7 +1553,7 @@ input[type="submit"] {
 
   .wday__name {
     flex-shrink: 0;
-    margin-bottom: 6px;
+    margin-bottom: 20px;
   }
 
   @supports (text-box: trim-both cap alphabetic) {
@@ -1599,7 +1599,7 @@ input[type="submit"] {
     flex-shrink: 0;
     gap: 3.475px;
     width: 82px;
-    margin-bottom: 7px;
+    margin-bottom: 21px;
     padding: 4px 0;
   }
 
@@ -1614,9 +1614,14 @@ input[type="submit"] {
     flex-wrap: nowrap;
   }
 
+  .wday__end::after,
+  .wday__below::after {
+    content: "------------------------------------------------------------------------------------------------------------------------------------------------------";
+    margin: 14px 0 0 calc(-82px - 16px);
+  }
+
   .wday__below::after {
     flex-basis: auto;
-    margin-inline: 0;
   }
 
   /* The title drops to the bottom, onto the dashed rule */
