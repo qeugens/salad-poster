@@ -38,8 +38,8 @@ img {
   /* Figma's "Quick" spring (mass 1, stiffness 300, damping 20) sampled over 620ms,
      as in the prototype: overshoots ~11% and settles */
   --poster-ease: linear(0, 0.052, 0.18, 0.346, 0.521, 0.686, 0.827, 0.938, 1.019, 1.071, 1.099, 1.108, 1.104, 1.091, 1.073, 1.054, 1.036, 1.02, 1.008, 0.999, 0.993, 0.989, 0.988, 0.989, 0.99, 0.992, 0.994, 0.996, 0.998, 0.999, 1, 1);
-  --color-bg: #ffffff;
-  --color-text: #111111;
+  --color-bg: #f5f5f5;
+  --color-text: #1a1a1a;
   --color-orange: #ff9633;
   --color-pink: #f74980;
 
@@ -67,12 +67,12 @@ html {
 /* Black body (hidden under the page): newer iOS Safari takes the status bar colour from it */
 body {
   color: var(--color-text);
-  background: #000;
+  background: var(--color-text);
 }
 
 html {
   /* A 9px plus with 1px strokes in the middle of every 36px tile */
-  --canvas-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Cpath d='M17 13h1v9h-1zM13 17h9v1h-9z' fill='%23fff' fill-opacity='.08'/%3E%3C/svg%3E");
+  --canvas-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Cpath d='M17 13h1v9h-1zM13 17h9v1h-9z' fill='%23f5f5f5' fill-opacity='.08'/%3E%3C/svg%3E");
 }
 
 body::before,
@@ -90,7 +90,7 @@ body::before {
   top: 0;
   bottom: 0;
   z-index: -1;
-  background-color: #000;
+  background-color: var(--color-text);
 }
 
 /* Just above the top of the page, out of scroll reach: only the bounce past the top
@@ -99,7 +99,7 @@ body::after {
   position: absolute;
   bottom: 100%;
   height: 100vh;
-  background-color: #000;
+  background-color: var(--color-text);
   background-position: 0 100%;
 }
 
@@ -121,7 +121,7 @@ body::after {
     right: 0;
     height: 6px;
     z-index: 10000;
-    background: #000;
+    background: var(--color-text);
     pointer-events: none;
   }
 
@@ -144,18 +144,18 @@ body::after {
 }
 
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: var(--color-text);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 0;
 }
 
 /* Firefox has no scrollbar pseudo-elements; it takes the colours only */
 @supports not selector(::-webkit-scrollbar) {
   html {
-    scrollbar-color: #fff #000;
+    scrollbar-color: var(--color-bg) var(--color-text);
   }
 }
 
@@ -313,8 +313,9 @@ input[type="submit"] {
 }
 
 /* Lifts a little and stays up while hovered, moving off right away (ease-out).
-   .is-lit plays the same look from js/script.js (the quick wave on page load). */
-.title__letter:hover,
+   .is-lit plays the same look from js/script.js: the quick wave on page load, and a tap
+   on touch screens. Hover itself only counts with a mouse: a tap's hover would stick
+   until the next tap somewhere else */
 .is-lit .title__letter {
   translate: var(--side, 0px) var(--lift);
   transition-delay: 0s;
@@ -324,25 +325,42 @@ input[type="submit"] {
 .title__word:first-child { --side: calc(-1 * var(--lean)); }
 .title__word:last-child { --side: var(--lean); }
 
-.title__letter:hover > text,
-.title__letter:hover .title__card,
 .is-lit .title__letter > text,
 .is-lit .title__card {
   transition-delay: var(--swap-delay);
 }
 
 /* The hovered letter comes to the front, and stays there while it holds its look */
-.title__word:hover,
 .title__word.is-lit {
   z-index: 2;
   transition-delay: 0s;
 }
 
-.title__letter:hover > text,
 .is-lit .title__letter > text { opacity: 0; }
 
-.title__letter:hover .title__card,
 .is-lit .title__card { visibility: visible; }
+
+@media (hover: hover) {
+  .title__letter:hover {
+    translate: var(--side, 0px) var(--lift);
+    transition-delay: 0s;
+    transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .title__letter:hover > text,
+  .title__letter:hover .title__card {
+    transition-delay: var(--swap-delay);
+  }
+
+  .title__word:hover {
+    z-index: 2;
+    transition-delay: 0s;
+  }
+
+  .title__letter:hover > text { opacity: 0; }
+
+  .title__letter:hover .title__card { visibility: visible; }
+}
 
 /* During the wave a letter lets go right away instead of holding its look */
 .title.is-waving {
@@ -350,7 +368,6 @@ input[type="submit"] {
 }
 
 /* Phone-only art (see the phone section) */
-.title__swoosh,
 .title__tomato {
   display: none;
 }
@@ -521,7 +538,7 @@ input[type="submit"] {
   flex-direction: column;
   align-items: center;
   width: 129px;
-  color: #fff;
+  color: var(--color-bg);
   text-decoration: none;
 }
 
@@ -963,7 +980,7 @@ input[type="submit"] {
   width: 264px;
   height: 270px;
   padding-top: 60px;
-  color: #fff;
+  color: var(--color-bg);
   text-decoration: none;
 }
 
@@ -1223,7 +1240,7 @@ input[type="submit"] {
   left: 81px;
   display: flex;
   align-items: flex-start;
-  color: #fff;
+  color: var(--color-bg);
   font-family: var(--font-arial-narrow);
   font-style: italic;
   line-height: 0.77;
@@ -1340,11 +1357,11 @@ input[type="submit"] {
 
   /* Spacing from the mobile frame (390px, y from under its 59px status bar, which the
      browser draws itself): the white sheet from y 16, title box from y 48, the strip's
-     rules at y 191 and 226, content from y 308 */
+     rules at y 166 and 201, content from y 293 */
   :root {
     --hero-top: 32px;
-    --hero-gap: 40.4px;
-    --content-top: 61.7px;
+    --hero-gap: 15.4px;
+    --content-top: 71.7px;
   }
 
   /* The page is a white sheet on the black canvas, torn into a zigzag along the top */
@@ -1368,7 +1385,7 @@ input[type="submit"] {
   }
 
   /* SALAD: the letters are bigger and shuffled from the desktop places, each with an
-     8px white outline, stacked s, swoosh, A, L, a, d, tomato from back to front.
+     8px white outline, stacked s, A, L, a, d, tomato from back to front.
      Each letter SVG moves and scales around its letter's old top-left corner; the
      percentages are of the title box (374 x 102.6 at 390px), so it all scales together */
   .title__word {
@@ -1396,7 +1413,6 @@ input[type="submit"] {
     paint-order: stroke;
   }
 
-  .title__swoosh,
   .title__tomato {
     display: block;
     position: absolute;
@@ -1405,22 +1421,12 @@ input[type="submit"] {
     pointer-events: none;
   }
 
-  /* Figma: rotated 165deg and flipped, turning around its top-left corner */
-  .title__swoosh {
-    z-index: 2;
-    left: 87.199%;
-    top: 106.798%;
-    width: 85.969%;
-    transform-origin: 1.248% 4.424%;
-    transform: matrix(-0.96593, -0.25882, -0.25882, 0.96593, 0, 0);
-  }
-
   /* Above every letter, even a lit one (10) */
   .title__tomato {
     z-index: 11;
-    left: 79.412%;
-    top: 83.823%;
-    width: 17.161%;
+    left: 79.718%;
+    top: 83.826%;
+    width: 16.548%;
   }
 
   /* Strip: rules 35px apart, the label 19px under the first */
