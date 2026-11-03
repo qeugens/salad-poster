@@ -437,6 +437,19 @@ input[type="submit"] {
   text-align: right;
 }
 
+/* When the two topics can't have the same number of lines side by side (JS), they stack
+   as on phones: the second tucked 20px up and pushed to the right */
+.topics.is-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.topics.is-stacked .topic--end {
+  justify-content: flex-end;
+  margin-top: -20px;
+}
+
 /* The black "!" capsules are Monofett's [ and ] */
 .bracket {
   padding-bottom: 6px;
@@ -499,9 +512,11 @@ input[type="submit"] {
 }
 
 /* ORDER NOW bubble: a tilted ellipse behind two lines of white text */
+/* ORDER NOW sticker: 20px more room above and below than the stack's own gap */
 .order {
   position: relative;
   align-self: center;
+  margin-block: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1367,11 +1382,6 @@ input[type="submit"] {
   .title__word:nth-child(4) { --ox: 56.739%; --oy: -14.133%; --dx: -0.394%; --dy: 1.319%; z-index: 3; }
   .title__word:nth-child(5) { --ox: 75.337%; --oy: 8.466%; --dx: -1.506%; --dy: 5.531%; z-index: 6; }
 
-  /* No tap animation on phones: the letters ignore touches (the load wave replays instead) */
-  .title__letter {
-    pointer-events: none;
-  }
-
   /* Stronger than the per-letter order above, so the hovered letter comes to the front */
   .title .title__word:hover,
   .title .title__word.is-lit {
@@ -1536,8 +1546,8 @@ input[type="submit"] {
     width: 100%;
   }
 
-  /* Week 2: the day blocks shrink to 82px and sit beside the text. Each row's dashed rule
-     runs the full width, like сб - чилл, just under the block */
+  /* Week 2: the day blocks shrink to 82px and sit beside the text, ending where it ends.
+     Each row's dashed rule runs the full width, like сб - чилл, 14px under the block */
   .wday {
     align-items: stretch;
     margin-bottom: 0;
@@ -1553,7 +1563,7 @@ input[type="submit"] {
 
   .wday__name {
     flex-shrink: 0;
-    margin-bottom: 20px;
+    margin-bottom: 34px; /* the rule's 14px gap + its 20px line */
   }
 
   @supports (text-box: trim-both cap alphabetic) {
@@ -1599,7 +1609,7 @@ input[type="submit"] {
     flex-shrink: 0;
     gap: 3.475px;
     width: 82px;
-    margin-bottom: 21px;
+    margin-bottom: 34px;
     padding: 4px 0;
   }
 

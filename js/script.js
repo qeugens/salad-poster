@@ -114,6 +114,94 @@ if (bag) {
   isPhone.addEventListener('change', () => openBag(false))
 }
 
+// Topic header: both parts always wrap onto the same number of lines. When they don't by
+// themselves, each gets a width (never narrower than its longest word, never wider than
+// 330px) so that both have the smallest line count they can share while fitting the row.
+// If no count fits side by side, the two parts stack as on phones (.is-stacked)
+const topicTexts = [...document.querySelectorAll('.topic__text')]
+const TOPIC_MAX_W = 330
+
+function countLines(el) {
+  return Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight))
+}
+
+// Tries to give both parts the same line count in the row's current arrangement
+function fitTopicLines(row) {
+  for (const text of topicTexts) text.style.flex = ''
+  if (countLines(topicTexts[0]) === countLines(topicTexts[1])) return true
+
+  const stacked = getComputedStyle(row).flexDirection === 'column'
+  const rowWidth = row.clientWidth
+  // Bracket and gap beside each text
+  const aside = topicTexts.map(t => t.parentElement.getBoundingClientRect().width - t.getBoundingClientRect().width)
+  const room = rowWidth - (parseFloat(getComputedStyle(row).columnGap) || 0) - aside[0] - aside[1]
+
+  const linesAt = (t, width) => {
+    t.style.flex = `0 0 ${width}px`
+    return countLines(t)
+  }
+  // Binary search over [lo, hi] for the edge where `ok` flips
+  const edge = (lo, hi, okAtLo, ok) => {
+    while (hi - lo > 0.5) {
+      const mid = (lo + hi) / 2
+      if (ok(mid) === okAtLo) lo = mid
+      else hi = mid
+    }
+    return okAtLo ? lo : hi
+  }
+
+  const parts = topicTexts.map((t, i) => {
+    t.style.flex = '0 0 0px'
+    const lo = t.scrollWidth  // its longest word
+    const hi = Math.max(lo, Math.min(TOPIC_MAX_W, stacked ? rowWidth - aside[i] : TOPIC_MAX_W))
+    return { t, lo, hi, most: linesAt(t, lo), least: linesAt(t, hi) }
+  })
+  const [p, q] = parts
+
+  for (let lines = Math.max(p.least, q.least); lines <= Math.min(p.most, q.most); lines++) {
+    // Narrowest width that needs no more than `lines`, widest that still needs that many
+    const range = part => [
+      edge(part.lo, part.hi, false, w => linesAt(part.t, w) <= lines),
+      edge(part.lo, part.hi, true, w => linesAt(part.t, w) >= lines),
+    ]
+    const [pMin, pMax] = range(p)
+    const [qMin, qMax] = range(q)
+    if (linesAt(p.t, pMin) !== lines || linesAt(q.t, qMin) !== lines) continue
+    if (!stacked && pMin + qMin > room) continue
+
+    // As wide as each can be, sharing the row
+    const pWidth = stacked ? pMax : Math.max(pMin, Math.min(pMax, room - qMin))
+    const qWidth = stacked ? qMax : Math.min(qMax, room - pWidth)
+    p.t.style.flex = `0 0 ${pWidth}px`
+    q.t.style.flex = `0 0 ${qWidth}px`
+    return true
+  }
+
+  for (const text of topicTexts) text.style.flex = ''
+  return false
+}
+
+function evenTopicLines() {
+  const row = document.querySelector('.topics')
+  row.classList.remove('is-stacked')
+  if (fitTopicLines(row)) return
+  // Side by side nothing works: stack them and even them out that way
+  row.classList.add('is-stacked')
+  fitTopicLines(row)
+}
+
+if (topicTexts.length === 2) {
+  let topicsWidth = 0
+  evenTopicLines()
+  document.fonts.ready.then(evenTopicLines)
+  // Only when the row gets wider or narrower, not when the evening-out changes its height
+  new ResizeObserver(([entry]) => {
+    if (entry.contentRect.width === topicsWidth) return
+    topicsWidth = entry.contentRect.width
+    evenTopicLines()
+  }).observe(document.querySelector('.topics'))
+}
+
 // Week 2 rows: the text column is as tall as the day block beside it. If its text doesn't
 // fit, the note's +++ goes (.is-tight); if it still doesn't fit, the column grows (.is-tall)
 const dayBodies = document.querySelectorAll('.wday__body')
@@ -153,7 +241,7 @@ function waveTitle() {
   setTimeout(() => title.classList.remove('is-waving'), end)
 }
 
-// On phones the letters don't react to taps; the wave replays every few seconds instead
+// On phones the wave also replays every few seconds; a tap plays a letter's hover look too
 const WAVE_REPEAT_MS = 8000
 
 if (title && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
