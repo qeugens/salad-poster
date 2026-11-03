@@ -1565,12 +1565,22 @@ input[type="submit"] {
     margin-bottom: 0;
   }
 
+  /* Each day's letters start where Figma puts them (--m-x from the block's left edge),
+     with its own tracking (--m-tracking), both set on the element in index.html */
   .wday__name,
   .wday__range span {
     width: 82px;
     height: auto;
+    padding-right: 0;
     font-size: 81px;
-    text-indent: calc(-0.029em + var(--nudge, 0px) / 3);
+    letter-spacing: var(--m-tracking, -0.07em);
+    text-align: left;
+    text-indent: var(--m-x, 0px);
+  }
+
+  /* The dash sits centred */
+  .wday__range span:nth-child(2) {
+    text-align: center;
   }
 
   .wday__name {
