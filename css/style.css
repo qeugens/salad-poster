@@ -1764,3 +1764,52 @@ a:focus-visible .swap__alt {
     linear-gradient(to bottom, rgba(0, 200, 0, 0.35) 1px, transparent 1px);
   background-size: var(--module) var(--module);
 }
+
+/* Sticker burst (built by js/script.js): stickers over the whole screen, above the bag
+   (17 on desktop, 9 on phones).
+   Hidden, each one sits shrunk and turned inside the hovered sticker (--dx/--dy); shown,
+   it springs out to its Figma spot one after another (--i). Going back is the same
+   spring, in reverse order (the last one out goes back first), each fading only as it
+   lands in the sticker. The hovered sticker stays on top of the pile */
+.burst {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.burst__item {
+  position: absolute;
+  opacity: 0;
+  transform: translate(var(--dx, 0), var(--dy, 0)) scale(0.15) rotate(var(--turn, 0deg));
+  --back: calc((var(--last) - var(--i)) * 22ms);
+  transition:
+    transform 0.62s var(--poster-ease) var(--back),
+    opacity 0.12s linear calc(var(--back) + 0.4s);
+}
+
+.burst__item > * {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.burst.is-on .burst__item {
+  opacity: 1;
+  transform: none;
+  transition:
+    transform 0.62s var(--poster-ease) calc(var(--i) * 22ms),
+    opacity 0.12s linear calc(var(--i) * 22ms);
+}
+
+.order.is-bursting {
+  z-index: 21;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst__item,
+  .burst.is-on .burst__item {
+    transform: none;
+    transition: opacity 0.2s linear;
+  }
+}

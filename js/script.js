@@ -326,11 +326,10 @@ if (title) {
 // filters come out soft on retina screens. Swap each marked <img> for the same SVG drawn
 // inline, which stays sharp at any zoom. Ids get a per-sticker prefix so masks and filters
 // of different stickers don't collide. If the fetch fails the <img> simply stays.
-document.querySelectorAll('img[data-inline-svg]').forEach((img, index) => {
+function inlineSvg(img, prefix) {
   fetch(img.src)
     .then(response => (response.ok ? response.text() : Promise.reject()))
     .then(text => {
-      const prefix = `s${index}-`
       const source = text
         .replace(/\bid="([^"]+)"/g, `id="${prefix}$1"`)
         .replace(/url\(#([^)]+)\)/g, `url(#${prefix}$1)`)
@@ -349,8 +348,182 @@ document.querySelectorAll('img[data-inline-svg]').forEach((img, index) => {
       img.replaceWith(svg)
     })
     .catch(() => {})
-})
+}
+
+document.querySelectorAll('img[data-inline-svg]').forEach((img, index) => inlineSvg(img, `s${index}-`))
 
 // iPhone Safari only applies :active (the pressed look the button text swap uses on
 // phones) when the page listens for touches; an empty listener is enough
 document.addEventListener('touchstart', () => {}, { passive: true })
+
+// Sticker burst: a sticker between the sections throws a pile of stickers across the
+// screen, flying out of it, and pulls them back in again. Desktop: on hover, with a mouse.
+// Phones and tablets: a tap bursts, the next tap anywhere pulls them back.
+// Each layout is a Figma frame: name, size, the fake browser bar on top (desktop), and
+// [sticker, x, y, width, height] in that frame, back to front. Positions scale with the
+// window (x by its width, y by its height), sizes by its width.
+const BURST_LAYOUTS = {
+  // "screen" 414:690, 1512 x 982 with a 33px browser bar
+  desktop: {
+    width: 1512,
+    top: 33,
+    height: 982 - 33,
+    stickers: [
+      ['pound', 1266, 14, 82, 112],
+      ['pizza', -9, -180, 333, 427],
+      ['cherries', 1303, 27, 382, 550],
+      ['bunny', -4, 659, 439, 605],
+      ['lightning', 1253, 530, 348, 459],
+      ['tomato', 573, 791, 269, 326],
+      ['dollar', 130, 284, 76, 127],
+      ['ruble', 954, 345, 97, 109],
+      ['yen', 1356, 837, 88, 110],
+      ['euro', 363, 795, 85, 112],
+      ['order-now', 260, 193, 426, 226],
+      ['mwah', 126, 351, 481, 355],
+      ['hotdog', 692, 27, 249, 307],
+      ['deal', 991, 127, 325, 209],
+      ['fukus', 488, 575, 266, 210],
+      ['sale', 955, 401, 304, 321],
+      ['go', 813, 610, 311, 228],
+    ],
+    // Order Now!!! or GO would show up twice (in the middle and in the pile), so their
+    // copy in the pile is swapped for Today Sale, centred on the copy's spot
+    standIns: {
+      'order-now': [316.5, 223, 313, 166],
+      go: [812, 641, 313, 166],
+    },
+  },
+  // "iPhone 13 & 14 - 6" 426:1786, 390 x 844: nine of the same stickers, same sizes
+  phone: {
+    width: 390,
+    top: 0,
+    height: 844,
+    stickers: [
+      ['mwah', 4, 362.96, 481, 355],
+      ['hotdog', 180.36, 684.43, 249, 307],
+      ['dollar', -28.24, 404.18, 76, 127],
+      ['euro', 13.15, -27, 85, 112],
+      ['ruble', 28.74, 721.55, 97, 109],
+      ['pound', 301.82, 565.98, 82, 112],
+      ['yen', 341, 287.01, 88, 110],
+      ['sale', 93.89, -46.38, 304, 321],
+      ['deal', -159.38, 141.56, 325, 209],
+    ],
+    standIns: {},
+  },
+}
+const STICKER_SPRING_MS = 620
+const STICKER_STAGGER_MS = 22
+const burstTriggers = document.querySelectorAll('.order')
+const canHoverBurst = matchMedia('(hover: hover) and (min-width: 771px)')
+let burst = null
+let burstMode = ''
+let burstBackTimer = 0
+
+const burstModeNow = () => (isPhone.matches ? 'phone' : 'desktop')
+
+// Built after the page has loaded (the stickers are heavy), for the current layout only,
+// and drawn inline so they stay sharp while they scale
+function buildBurst() {
+  const mode = burstModeNow()
+  if (burst && burstMode === mode) return
+  burst?.remove()
+  burstMode = mode
+  const layout = BURST_LAYOUTS[mode]
+  burst = document.createElement('div')
+  burst.className = 'burst'
+  burst.setAttribute('aria-hidden', 'true')
+  burst.style.setProperty('--last', layout.stickers.length - 1)
+  const addItem = (src, [x, y, w, h], index, key) => {
+    const item = document.createElement('div')
+    item.className = 'burst__item'
+    item.style.left = `${(x / layout.width) * 100}vw`
+    item.style.top = `${((y - layout.top) / layout.height) * 100}vh`
+    item.style.width = `${(w / layout.width) * 100}vw`
+    item.style.aspectRatio = `${w} / ${h}`
+    item.style.setProperty('--i', index)
+    // a little turn of its own while it flies, alternating sides
+    item.style.setProperty('--turn', `${(index % 2 ? 1 : -1) * (12 + (index * 7) % 18)}deg`)
+    const img = document.createElement('img')
+    img.src = src
+    img.alt = ''
+    item.append(img)
+    burst.append(item)
+    inlineSvg(img, `b${key}-`)
+    return item
+  }
+  layout.stickers.forEach(([name, ...box], index) => {
+    addItem(`assets/images/burst/${name}.svg?v=20261105-13`, box, index, index).dataset.name = name
+    const standIn = layout.standIns[name]
+    if (standIn) {
+      const item = addItem('assets/images/sticker-today-sale.svg?v=20261105-12', standIn, index, `${index}t`)
+      item.dataset.standsIn = name
+      item.hidden = true
+    }
+  })
+  document.body.append(burst)
+}
+
+function startBurst(sticker) {
+  buildBurst()
+  clearTimeout(burstBackTimer)
+  const from = sticker.getBoundingClientRect()
+  const cx = from.left + from.width / 2
+  const cy = from.top + from.height / 2
+  // order--order-now -> 'order-now'; Today Sale has no copy in the pile
+  const picked = [...sticker.classList].find(name => name.startsWith('order--'))?.slice(7)
+  for (const item of burst.children) {
+    if (item.dataset.standsIn) item.hidden = item.dataset.standsIn !== picked
+    else item.hidden = item.dataset.name === picked && picked in BURST_LAYOUTS[burstMode].standIns
+  }
+  for (const item of burst.children) {
+    if (item.hidden) continue
+    item.style.setProperty('--dx', `${cx - (item.offsetLeft + item.offsetWidth / 2)}px`)
+    item.style.setProperty('--dy', `${cy - (item.offsetTop + item.offsetHeight / 2)}px`)
+  }
+  burstTriggers.forEach(other => other.classList.toggle('is-bursting', other === sticker))
+  // the start positions are set before the class flips, so they fly from the sticker
+  requestAnimationFrame(() => burst.classList.add('is-on'))
+}
+
+// The sticker stays on top until the last one has flown back in behind it
+function endBurst() {
+  if (!burst?.classList.contains('is-on')) return
+  burst.classList.remove('is-on')
+  clearTimeout(burstBackTimer)
+  const backMs = (burst.children.length - 1) * STICKER_STAGGER_MS + STICKER_SPRING_MS
+  burstBackTimer = setTimeout(() => {
+    burstTriggers.forEach(sticker => sticker.classList.remove('is-bursting'))
+  }, backMs)
+}
+
+const isBurstOn = () => burst?.classList.contains('is-on')
+
+burstTriggers.forEach(sticker => {
+  sticker.addEventListener('mouseenter', () => canHoverBurst.matches && startBurst(sticker))
+  sticker.addEventListener('mouseleave', () => canHoverBurst.matches && endBurst())
+})
+
+// Phones and tablets (no hover): a tap on a sticker bursts; while the pile is out, any
+// tap pulls it back
+document.addEventListener('click', event => {
+  if (canHoverBurst.matches) return
+  if (isBurstOn()) {
+    endBurst()
+    return
+  }
+  const sticker = event.target.closest('.order')
+  if (sticker) startBurst(sticker)
+})
+
+isPhone.addEventListener('change', () => {
+  endBurst()
+  burst?.remove()
+  burst = null
+})
+canHoverBurst.addEventListener('change', endBurst)
+addEventListener('load', () => {
+  const later = window.requestIdleCallback || (fn => setTimeout(fn, 300))
+  later(buildBurst)
+})
