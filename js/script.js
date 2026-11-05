@@ -350,3 +350,7 @@ document.querySelectorAll('img[data-inline-svg]').forEach((img, index) => {
     })
     .catch(() => {})
 })
+
+// iPhone Safari only applies :active (the pressed look the button text swap uses on
+// phones) when the page listens for touches; an empty listener is enough
+document.addEventListener('touchstart', () => {}, { passive: true })
