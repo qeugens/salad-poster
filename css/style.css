@@ -1766,10 +1766,11 @@ a:focus-visible .swap__alt {
 }
 
 /* Sticker burst (built by js/script.js): stickers over the whole screen, above the bag
-   (17 on desktop, 9 on phones). Each sticker always sits at its Figma spot at full size,
-   only invisible while hidden, so the browser paints it at full resolution; the flight
-   out of (and back into) the sticker is a script animation on top (animateBurstItem).
-   The tapped/hovered sticker stays on top of the pile */
+   (17 on desktop, 9 on phones).
+   Hidden, each one sits shrunk and turned inside the hovered sticker (--dx/--dy); shown,
+   it springs out to its Figma spot one after another (--i). Going back is the same
+   spring, in reverse order (the last one out goes back first), each fading only as it
+   lands in the sticker. The hovered sticker stays on top of the pile */
 .burst {
   position: fixed;
   inset: 0;
@@ -1780,10 +1781,11 @@ a:focus-visible .swap__alt {
 .burst__item {
   position: absolute;
   opacity: 0;
-}
-
-.burst.is-on .burst__item {
-  opacity: 1;
+  transform: translate(var(--dx, 0), var(--dy, 0)) scale(0.15) rotate(var(--turn, 0deg));
+  --back: calc((var(--last) - var(--i)) * 22ms);
+  transition:
+    transform 0.62s var(--poster-ease) var(--back),
+    opacity 0.12s linear calc(var(--back) + 0.4s);
 }
 
 .burst__item > * {
@@ -1792,6 +1794,29 @@ a:focus-visible .swap__alt {
   height: 100%;
 }
 
+.burst.is-on .burst__item {
+  opacity: 1;
+  transform: none;
+  transition:
+    transform 0.62s var(--poster-ease) calc(var(--i) * 22ms),
+    opacity 0.12s linear calc(var(--i) * 22ms);
+}
+
+/* Landed: no transform and no transition, so the browser paints it as a still, sharp
+   picture (see settleBurstItem in js/script.js) */
+.burst.is-on .burst__item.is-settled {
+  transform: none;
+  transition: none;
+}
+
 .order.is-bursting {
   z-index: 21;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst__item,
+  .burst.is-on .burst__item {
+    transform: none;
+    transition: opacity 0.2s linear;
+  }
 }
