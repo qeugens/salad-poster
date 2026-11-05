@@ -449,6 +449,7 @@ function buildBurst() {
     img.src = src
     img.alt = ''
     item.append(img)
+    item.addEventListener('transitionend', settleBurstItem)
     burst.append(item)
     inlineSvg(img, `b${key}-`)
     return item
@@ -487,9 +488,24 @@ function startBurst(sticker) {
   requestAnimationFrame(() => burst.classList.add('is-on'))
 }
 
+// Safari and Arc paint a sticker once at the tiny size it flies out from and then only
+// stretch that picture, so it lands blurry. Once a sticker has landed it drops its
+// animation (.is-settled: no transform, no transition) and its SVG is swapped for a fresh
+// copy, which the browser paints anew at full size, sharp
+function settleBurstItem(event) {
+  const item = event.currentTarget
+  if (event.target !== item || event.propertyName !== 'transform') return
+  if (!burst.classList.contains('is-on') || item.classList.contains('is-settled')) return
+  item.classList.add('is-settled')
+  const art = item.firstElementChild
+  if (art) art.replaceWith(art.cloneNode(true))
+}
+
 // The sticker stays on top until the last one has flown back in behind it
 function endBurst() {
   if (!burst?.classList.contains('is-on')) return
+  // back to the animated state first, so the flight back is the same spring
+  for (const item of burst.children) item.classList.remove('is-settled')
   burst.classList.remove('is-on')
   clearTimeout(burstBackTimer)
   const backMs = (burst.children.length - 1) * STICKER_STAGGER_MS + STICKER_SPRING_MS
