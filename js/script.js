@@ -90,9 +90,46 @@ if (bag && blackout) {
 }
 
 // The poster comes out of the bag (.is-open): on hover on desktop, on tap on phones.
-// A tap on the bag again, anywhere else, or Escape puts it back.
+// On desktop a click on the bag or poster scrolls down to the buy section. On phones a
+// tap only brings the poster out and the next tap hides it again. A tap anywhere else
+// or Escape puts the poster back.
+const buy = document.querySelector('.buy')
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)')
+
 function openBag(isOpen) {
   bag.classList.toggle('is-open', isOpen)
+}
+
+// Our own smooth scroll: the browser's is slow over a long page and can't be sped up.
+// This one always takes SCROLL_TIME, easing in and out. A wheel or touch stops it.
+const SCROLL_TIME = 450
+
+function goToBuy() {
+  openBag(false)
+  if (!buy) return
+  const from = scrollY
+  const to = from + buy.getBoundingClientRect().top
+  if (reduceMotion.matches) {
+    scrollTo(0, to)
+    return
+  }
+  const start = performance.now()
+  let isStopped = false
+  const stop = () => (isStopped = true)
+  addEventListener('wheel', stop, { once: true, passive: true })
+  addEventListener('touchstart', stop, { once: true, passive: true })
+  const step = now => {
+    if (isStopped) return
+    const t = Math.min((now - start) / SCROLL_TIME, 1)
+    const eased = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
+    scrollTo(0, from + (to - from) * eased)
+    if (t < 1) requestAnimationFrame(step)
+    else {
+      removeEventListener('wheel', stop)
+      removeEventListener('touchstart', stop)
+    }
+  }
+  requestAnimationFrame(step)
 }
 
 if (bag) {
@@ -101,6 +138,15 @@ if (bag) {
 
   bag.addEventListener('click', () => {
     if (isPhone.matches) openBag(!bag.classList.contains('is-open'))
+    else goToBuy()
+  })
+
+  // Keyboard: Enter or Space on the focused bag does the same as a click
+  bag.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      goToBuy()
+    }
   })
 
   document.addEventListener('click', event => {
