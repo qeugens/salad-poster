@@ -35,6 +35,11 @@ document.addEventListener('keydown', event => {
   save(name, !overlay[name].hidden)
 })
 
+// Always open at the very top, zigzag and all: browsers (Safari on iPhone above all) put
+// a reloaded or reopened page back where it was scrolled. A link to a #spot still works
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+if (!location.hash) scrollTo(0, 0)
+
 // Status bar strip (iOS): Safari takes the bar colour from it while the page loads, then
 // it hides while the white sheet is still below the zigzag, so it never covers the teeth
 const statusTint = document.querySelector('.status-tint')
@@ -66,7 +71,8 @@ const BAG_SCREEN_GAP = 24  // from the bottom of the screen
 const BAG_BLACK_GAP = 100  // from the top of the black section
 
 function placeBag() {
-  const blackTop = blackout.getBoundingClientRect().top
+  // the black ending can be switched off (hidden): then there's no black to stop above
+  const blackTop = blackout.hidden ? Infinity : blackout.getBoundingClientRect().top
 
   if (isPhone.matches) {
     bag.style.bottom = ''
@@ -449,7 +455,6 @@ function buildBurst() {
     img.src = src
     img.alt = ''
     item.append(img)
-    item.addEventListener('transitionend', settleBurstItem)
     burst.append(item)
     inlineSvg(img, `b${key}-`)
     return item
@@ -478,34 +483,59 @@ function startBurst(sticker) {
     if (item.dataset.standsIn) item.hidden = item.dataset.standsIn !== picked
     else item.hidden = item.dataset.name === picked && picked in BURST_LAYOUTS[burstMode].standIns
   }
-  for (const item of burst.children) {
-    if (item.hidden) continue
-    item.style.setProperty('--dx', `${cx - (item.offsetLeft + item.offsetWidth / 2)}px`)
-    item.style.setProperty('--dy', `${cy - (item.offsetTop + item.offsetHeight / 2)}px`)
-  }
+  const shown = [...burst.children].filter(item => !item.hidden)
+  shown.forEach((item, index) => {
+    const dx = cx - (item.offsetLeft + item.offsetWidth / 2)
+    const dy = cy - (item.offsetTop + item.offsetHeight / 2)
+    item.inside = `translate(${dx}px, ${dy}px) scale(0.15) rotate(${item.style.getPropertyValue('--turn')})`
+    animateBurstItem(item, true, index * STICKER_STAGGER_MS)
+  })
   burstTriggers.forEach(other => other.classList.toggle('is-bursting', other === sticker))
-  // the start positions are set before the class flips, so they fly from the sticker
-  requestAnimationFrame(() => burst.classList.add('is-on'))
+  burst.classList.add('is-on')
 }
 
-// Safari and Arc paint a sticker once at the tiny size it flies out from and then only
-// stretch that picture, so it lands blurry. Once a sticker has landed it drops its
-// animation (.is-settled: no transform, no transition) and its SVG is swapped for a fresh
-// copy, which the browser paints anew at full size, sharp
-function settleBurstItem(event) {
-  const item = event.currentTarget
-  if (event.target !== item || event.propertyName !== 'transform') return
-  if (!burst.classList.contains('is-on') || item.classList.contains('is-settled')) return
-  item.classList.add('is-settled')
-  const art = item.firstElementChild
-  if (art) art.replaceWith(art.cloneNode(true))
+// The flight: from inside the sticker (small, turned) to the sticker's spot, or back.
+// A stopped flight carries on from where it is. The sticker's own resting state is full
+// size, so Safari and Arc keep a full-resolution picture and only shrink it in flight;
+// a flight that starts from a shrunken resting state would stay blurry until it lands
+const posterEase = getComputedStyle(document.documentElement).getPropertyValue('--poster-ease').trim()
+// the poster's spring (CSS linear()); older browsers can't take it here, so a plain ease
+const STICKER_EASE = posterEase && CSS.supports('transition-timing-function', posterEase)
+  ? posterEase
+  : 'cubic-bezier(0.34, 1.4, 0.64, 1)'
+
+function animateBurstItem(item, isOut, delay) {
+  const now = getComputedStyle(item)
+  const from = { transform: now.transform, opacity: now.opacity }
+  item.getAnimations().forEach(animation => animation.cancel())
+  if (reduceMotion.matches) {
+    item.animate([{ opacity: from.opacity }, { opacity: isOut ? 1 : 0 }], { duration: 200 })
+    return
+  }
+  const isMoving = from.transform !== 'none' || from.opacity !== (isOut ? '0' : '1')
+  const start = isMoving ? from : { transform: isOut ? item.inside : 'none', opacity: isOut ? 0 : 1 }
+  item.animate([{ transform: start.transform }, { transform: isOut ? 'none' : item.inside }], {
+    duration: STICKER_SPRING_MS,
+    delay,
+    easing: STICKER_EASE,
+    fill: 'backwards',
+  })
+  // visible as it leaves the sticker, fading only once it is back inside
+  item.animate([{ opacity: start.opacity }, { opacity: isOut ? 1 : 0 }], {
+    duration: 120,
+    delay: isOut ? delay : delay + 400,
+    fill: 'backwards',
+  })
 }
 
 // The sticker stays on top until the last one has flown back in behind it
 function endBurst() {
   if (!burst?.classList.contains('is-on')) return
-  // back to the animated state first, so the flight back is the same spring
-  for (const item of burst.children) item.classList.remove('is-settled')
+  // the same spring back, in reverse order: the last one out goes back in first
+  const shown = [...burst.children].filter(item => !item.hidden)
+  shown.forEach((item, index) => {
+    animateBurstItem(item, false, (shown.length - 1 - index) * STICKER_STAGGER_MS)
+  })
   burst.classList.remove('is-on')
   clearTimeout(burstBackTimer)
   const backMs = (burst.children.length - 1) * STICKER_STAGGER_MS + STICKER_SPRING_MS
