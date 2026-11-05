@@ -38,7 +38,7 @@ img {
   /* Figma's "Quick" spring (mass 1, stiffness 300, damping 20) sampled over 620ms,
      as in the prototype: overshoots ~11% and settles */
   --poster-ease: linear(0, 0.052, 0.18, 0.346, 0.521, 0.686, 0.827, 0.938, 1.019, 1.071, 1.099, 1.108, 1.104, 1.091, 1.073, 1.054, 1.036, 1.02, 1.008, 0.999, 0.993, 0.989, 0.988, 0.989, 0.99, 0.992, 0.994, 0.996, 0.998, 0.999, 1, 1);
-  --color-bg: #f5f5f5;
+  --color-bg: #fafafa;
   --color-text: #1a1a1a;
   --color-orange: #ff9633;
   --color-pink: #f74980;
@@ -56,9 +56,8 @@ img {
   --stack-gap: 80px;      /* auto layout gap between page sections and stickers */
 }
 
-/* Black behind the page, with a + pattern on a layer pinned to the screen. Browsers paint
-   only the plain colour in the scroll bounce area, so the pattern lives on a fixed layer
-   that stays put while the page bounces; the black ending is transparent and shows it too */
+/* Plain black behind the page, on a layer pinned to the screen that stays put while the
+   page bounces; the black ending is transparent and shows it too */
 /* White canvas: what the bounce past the bottom of the page shows */
 html {
   background: var(--color-bg);
@@ -70,17 +69,11 @@ body {
   background: var(--color-text);
 }
 
-html {
-  /* A 9px plus with 1px strokes in the middle of every 36px tile */
-  --canvas-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Cpath d='M17 13h1v9h-1zM13 17h9v1h-9z' fill='%23f5f5f5' fill-opacity='.08'/%3E%3C/svg%3E");
-}
-
 body::before,
 body::after {
   content: "";
   left: 0;
   right: 0;
-  background: var(--canvas-pattern) 0 0 / 36px 36px;
   pointer-events: none;
 }
 
@@ -94,13 +87,12 @@ body::before {
 }
 
 /* Just above the top of the page, out of scroll reach: only the bounce past the top
-   reveals it. Anchored to its bottom edge so the tiles line up with the layer above */
+   reveals it */
 body::after {
   position: absolute;
   bottom: 100%;
   height: 100vh;
   background-color: var(--color-text);
-  background-position: 0 100%;
 }
 
 /* A black strip pinned to the top of the screen on iOS. Safari 26 ignores theme-color and
@@ -528,7 +520,7 @@ input[type="submit"] {
   line-height: 20px;
 }
 
-/* Order stickers (Figma SVGs: Today sale, Order now!!!, Oh what a deal), centred,
+/* Order stickers (Figma SVGs: Today sale, Order now!!!, GO), centred,
    the stack's 80px gap above and below.
    The box is the sticker's Figma group; the SVG's outlines spill past it a little, so
    the art is placed by its offset from the group, in % so it scales on narrow phones. */
@@ -570,12 +562,11 @@ input[type="submit"] {
   --art-w: 293.132;
 }
 
-.order--deal {
-  --w: 283.83;
-  --h: 184.447;
-  --art-x: -8.672;
-  --art-w: 293;
-  --art-h: 185;
+.order--go {
+  --w: 276.005;
+  --h: 160.527;
+  --art-w: 276;
+  --art-h: 161;
 }
 
 /* Week sections */
@@ -965,32 +956,41 @@ input[type="submit"] {
   text-decoration: underline;
 }
 
-/* Buy: big ORDER, buy link + QR, ask button */
+/* Buy: big ORDER NOW, buy link + QR, ask button, stacked with no gaps (Figma) */
 .buy {
   display: flex;
   flex-direction: column;
-  gap: 16px;
   width: 100%;
 }
 
-/* Big order: the GO sticker with the 130 € burst, one Figma SVG. 20px more room above
-   than the other blocks. The box is Figma's 740 x 208.7 frame; the burst spills 65px
-   past its right edge, as in Figma */
+/* Big ORDER NOW: a black banner with stars and the 130 € burst, one Figma SVG.
+   60px of room above it. The box is Figma's 270px-tall slot; the art starts 39.5px above
+   the slot and its burst hangs 88px down over the buy row, as in Figma. The art lets
+   clicks through, so the buy link under the burst still works */
 .buy__top {
-  padding-top: 20px;
+  padding-top: 60px;
 }
 
 .big-order {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
-  aspect-ratio: 740 / 208.713;
+  aspect-ratio: 740 / 270;
 }
 
 .big-order__art {
-  display: block;
-  width: calc(805 / 740 * 100%);
-  max-width: none;
+  position: absolute;
+  top: calc(-39.479 / 270 * 100%);
+  left: 0;
+  width: calc(742 / 740 * 100%);
   height: auto;
+  max-width: none;
+  pointer-events: none;
+}
+
+.big-order__art--phone {
+  display: none;
 }
 
 /* The buy link and the QR split the row and stay square as it narrows; the label gets
@@ -1336,7 +1336,7 @@ input[type="submit"] {
     left: 0;
     width: 100%;
     height: 11.1px;
-    background: url("../assets/images/zigzag.svg") 0 0 / 100% 100%;
+    background: url("../assets/images/zigzag.svg?v=20261105-3") 0 0 / 100% 100%;
   }
 
   /* SALAD: the letters are bigger and shuffled from the desktop places, each with an
@@ -1632,16 +1632,27 @@ input[type="submit"] {
     flex-direction: column;
   }
 
-  /* Phone big order: its own SVG, a bigger GO with the burst under it. The box is the
-     373 x 298 art (it spills 7px past the right edge); the burst's tip stops ~1px above
-     the buy button */
-  .big-order {
-    aspect-ratio: 373 / 298;
-    margin-bottom: -15px;
+  /* Phone big ORDER NOW: its own SVG (two lines, the burst under NOW), sitting right on
+     the buy button. Its top is as far below "by who" as on desktop (100.5px); the art
+     reaches 4.7px past the left edge and 5.3px past the right, as in Figma */
+  .buy__top {
+    padding-top: 20.5px;
   }
 
-  .big-order__art {
-    width: calc(380 / 373 * 100%);
+  .big-order {
+    width: calc(384 / 374 * 100%);
+    margin-left: calc(-4.659 / 374 * 100%);
+    aspect-ratio: 384 / 228;
+  }
+
+  .big-order__art--desk {
+    display: none;
+  }
+
+  .big-order__art--phone {
+    position: static;
+    display: block;
+    width: 100%;
   }
 
   /* Buy: the buy button and ask button stack as squares */
@@ -1662,10 +1673,6 @@ input[type="submit"] {
   /* No QR on phones: the ask button sits right under the buy button */
   .buy__qr {
     display: none;
-  }
-
-  .buy__pay + .ask {
-    margin-top: -16px;
   }
 
   .ask {

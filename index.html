@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Monofett&display=swap">
   <!-- ?v= changes with every update, so browsers fetch the new files instead of cached ones -->
-  <link rel="stylesheet" href="css/fonts.css?v=20261104-2">
-  <link rel="stylesheet" href="css/style.css?v=20261104-2">
+  <link rel="stylesheet" href="css/fonts.css?v=20261105-3">
+  <link rel="stylesheet" href="css/style.css?v=20261105-3">
 </head>
 <body>
   <div class="status-tint" aria-hidden="true"></div>
@@ -65,7 +65,7 @@
           </g>
         </svg>
         <!-- Phones only: a tomato by the d -->
-        <img class="title__tomato" src="assets/images/tomato.svg" alt="" aria-hidden="true">
+        <img class="title__tomato" src="assets/images/tomato.svg?v=20261105-3" alt="" aria-hidden="true">
       </h1>
 
       <div class="workshop">
@@ -123,7 +123,7 @@
         </section>
 
         <a class="order order--today-sale" href="#">
-          <img class="order__art" src="assets/images/sticker-today-sale.svg" alt="Today sale and tomorrow">
+          <img class="order__art" data-inline-svg src="assets/images/sticker-today-sale.svg?v=20261105-4" alt="Today sale and tomorrow">
         </a>
 
         <!-- Week 1 -->
@@ -178,7 +178,7 @@
         </section>
 
         <a class="order order--order-now" href="#">
-          <img class="order__art" src="assets/images/sticker-order-now.svg" alt="Order now!!!">
+          <img class="order__art" data-inline-svg src="assets/images/sticker-order-now.svg?v=20261105-4" alt="Order now!!!">
         </a>
 
         <!-- Week 2 -->
@@ -225,7 +225,7 @@
                 <p class="wday__note">индивидуальная работа</p>
                 <div class="wday__wide">
                   <h3 class="wday__title">приготовле&shy;ние плаката</h3>
-                  <img class="wday__art" src="assets/images/welder.svg" alt="" width="89" height="80">
+                  <img class="wday__art" src="assets/images/welder.svg?v=20261105-2" alt="" width="89" height="80">
                 </div>
               </div>
             </article>
@@ -269,8 +269,8 @@
           </div>
         </section>
 
-        <a class="order order--deal" href="#">
-          <img class="order__art" src="assets/images/sticker-deal.svg" alt="Oh what a deal $$">
+        <a class="order order--go" href="#">
+          <img class="order__art" data-inline-svg src="assets/images/sticker-go.svg?v=20261105-2" alt="GO">
         </a>
 
         <!-- By who -->
@@ -309,11 +309,9 @@
         <section class="buy" aria-label="Купить">
           <div class="buy__top">
             <!-- TODO: order link -->
-            <a class="big-order" href="#">
-              <picture>
-                <source media="(max-width: 770px)" srcset="assets/images/big-order-go-phone.svg">
-                <img class="big-order__art" src="assets/images/big-order-go.svg" alt="GO — 130 €">
-              </picture>
+            <a class="big-order" href="#" aria-label="Order now!!! 130 €">
+              <img data-inline-svg class="big-order__art big-order__art--desk" src="assets/images/order-now-desk.svg?v=20261105-4" alt="">
+              <img data-inline-svg class="big-order__art big-order__art--phone" src="assets/images/order-now-phone.svg?v=20261105-4" alt="">
             </a>
           </div>
 
@@ -321,7 +319,7 @@
             <!-- TODO: payment link -->
             <a class="buy__link" href="#">&gt;купить&lt;</a>
             <div class="buy__qr">
-              <img src="assets/images/qr-art.png" alt="QR-код для оплаты">
+              <img src="assets/images/qr-art.png?v=20261105-4" alt="QR-код для оплаты">
             </div>
           </div>
 
@@ -344,7 +342,7 @@
         </ul>
         <img class="bag__body" src="assets/images/bag.svg" alt="">
         <span class="bag__burst" aria-hidden="true">
-          <img class="bag__burst-shape" src="assets/images/bag-burst.svg" alt="">
+          <img class="bag__burst-shape" src="assets/images/bag-burst.svg?v=20261105-3" alt="">
           <span class="bag__burst-big">!!!</span><span class="bag__burst-small">&nbsp;(€)</span>
         </span>
       </aside>
@@ -362,6 +360,6 @@
     <div class="grid-overlay__module"></div>
   </div>
 
-  <script src="js/script.js?v=20261104-2"></script>
+  <script src="js/script.js?v=20261105-3"></script>
 </body>
 </html>

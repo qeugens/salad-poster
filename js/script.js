@@ -275,3 +275,32 @@ if (title) {
     word.tapTimer = setTimeout(() => word.classList.remove('is-lit'), TAP_LIT_MS)
   })
 }
+
+// Stickers: Safari draws an SVG inside <img> as a flat picture, so stickers with masks and
+// filters come out soft on retina screens. Swap each marked <img> for the same SVG drawn
+// inline, which stays sharp at any zoom. Ids get a per-sticker prefix so masks and filters
+// of different stickers don't collide. If the fetch fails the <img> simply stays.
+document.querySelectorAll('img[data-inline-svg]').forEach((img, index) => {
+  fetch(img.src)
+    .then(response => (response.ok ? response.text() : Promise.reject()))
+    .then(text => {
+      const prefix = `s${index}-`
+      const source = text
+        .replace(/\bid="([^"]+)"/g, `id="${prefix}$1"`)
+        .replace(/url\(#([^)]+)\)/g, `url(#${prefix}$1)`)
+        .replace(/href="#([^"]+)"/g, `href="#${prefix}$1"`)
+      const svg = new DOMParser().parseFromString(source, 'image/svg+xml').documentElement
+      if (svg.nodeName !== 'svg') return
+      svg.removeAttribute('style')
+      svg.setAttribute('class', img.className)
+      // Keep the <img>'s alt as the sticker's name, so its link still reads the same
+      if (img.alt) {
+        svg.setAttribute('role', 'img')
+        svg.setAttribute('aria-label', img.alt)
+      } else {
+        svg.setAttribute('aria-hidden', 'true')
+      }
+      img.replaceWith(svg)
+    })
+    .catch(() => {})
+})
