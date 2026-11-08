@@ -296,7 +296,7 @@ function waveTitle() {
 // On phones the wave also replays every few seconds
 const WAVE_REPEAT_MS = 8000
 
-if (title && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+if (title && !reduceMotion.matches) {
   document.fonts.ready.then(waveTitle)
   setInterval(() => {
     if (isPhone.matches && !document.hidden) waveTitle()
@@ -344,7 +344,7 @@ function inlineSvg(img, prefix) {
       if (svg.nodeName !== 'svg') return
       svg.removeAttribute('style')
       svg.setAttribute('class', img.className)
-      // Keep the <img>'s alt as the sticker's name, so its link still reads the same
+      // Keep the <img>'s alt as the sticker's name for screen readers
       if (img.alt) {
         svg.setAttribute('role', 'img')
         svg.setAttribute('aria-label', img.alt)
@@ -461,10 +461,10 @@ function buildBurst() {
     return item
   }
   layout.stickers.forEach(([name, ...box], index) => {
-    addItem(`assets/images/burst/${name}.svg?v=20261106-1`, box, index, index).dataset.name = name
+    addItem(`assets/images/burst/${name}.svg?v=20261108-1`, box, index, index).dataset.name = name
     const standIn = layout.standIns[name]
     if (standIn) {
-      const item = addItem('assets/images/sticker-today-sale.svg?v=20261105-12', standIn, index, `${index}t`)
+      const item = addItem('assets/images/sticker-today-sale.svg?v=20261108-1', standIn, index, `${index}t`)
       item.dataset.standsIn = name
       item.hidden = true
     }

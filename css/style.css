@@ -56,9 +56,7 @@ img {
   --stack-gap: 80px;      /* auto layout gap between page sections and stickers */
 }
 
-/* Plain black behind the page, on a layer pinned to the screen that stays put while the
-   page bounces; the black ending is transparent and shows it too */
-/* White canvas: what the bounce past the bottom of the page shows */
+/* Canvas: what the bounce past the bottom of the page shows */
 html {
   background: var(--color-bg);
 }
@@ -164,11 +162,7 @@ html {
 }
 
 a,
-button,
-label,
-[role="button"],
-input[type="button"],
-input[type="submit"] {
+[role="button"] {
   cursor: var(--cursor-link);
 }
 
@@ -533,7 +527,6 @@ input[type="submit"] {
   --art-h: var(--h);
   position: relative;
   align-self: center;
-  display: block;
   width: min(calc(var(--w) * 1px), 100%);
   aspect-ratio: var(--w) / var(--h);
 }
@@ -970,7 +963,6 @@ input[type="submit"] {
 .big-order {
   position: relative;
   z-index: 1;
-  display: block;
   width: 100%;
   aspect-ratio: 740 / 270;
 }
@@ -1350,11 +1342,9 @@ a:focus-visible .swap__alt {
     width: var(--poster-w);
     height: calc(var(--poster-w) * 4 / 3);
   }
-}
 
-/* Phones and small tablets (up to 770px): Figma frame "iPhone 13 & 14" (390px).
-   Everything spans the full width and stacks; vertical spacing stays as on desktop */
-@media (max-width: 770px) {
+  /* The rest of the phone layout (Figma frame "iPhone 13 & 14", 390px): everything
+     spans the full width and stacks; vertical spacing stays as on desktop */
   .title,
   .workshop,
   .stack {
@@ -1387,7 +1377,7 @@ a:focus-visible .swap__alt {
     left: 0;
     width: 100%;
     height: 11.1px;
-    background: url("../assets/images/zigzag.svg?v=20261105-3") 0 0 / 100% 100%;
+    background: url("../assets/images/zigzag.svg?v=20261108-1") 0 0 / 100% 100%;
   }
 
   /* SALAD: the letters are bigger and shuffled from the desktop places, each with an
@@ -1419,16 +1409,13 @@ a:focus-visible .swap__alt {
     paint-order: stroke;
   }
 
+  /* Above every letter, even a lit one (10) */
   .title__tomato {
     display: block;
     position: absolute;
     max-width: none;
     height: auto;
     pointer-events: none;
-  }
-
-  /* Above every letter, even a lit one (10) */
-  .title__tomato {
     z-index: 11;
     left: 79.718%;
     top: 83.826%;
@@ -1606,16 +1593,12 @@ a:focus-visible .swap__alt {
 
   .wday__body {
     flex: 1;
-    flex-shrink: 1;
     min-width: 0;
-    width: auto;
     height: auto;
     min-height: 157px;
     gap: 18px;
   }
 
-  .wday__note,
-  .wday__title,
   .wday__below .wday__note {
     width: auto;
   }
@@ -1737,7 +1720,7 @@ a:focus-visible .swap__alt {
   width: 100%;
   height: 100vh;   /* fallback for older browsers */
   height: 100dvh;  /* follows the visible screen on phones as the browser bars show and hide */
-  /* Transparent: the dotted black canvas shows through */
+  /* Transparent: the black layer behind the page (body::before) shows through */
 }
 
 /* Grid overlay for checking against Figma: press G to toggle columns, M for the module grid */
