@@ -375,29 +375,29 @@ const BURST_LAYOUTS = {
     top: 33,
     height: 982 - 33,
     stickers: [
-      ['pound', 1266, 14, 82, 112],
-      ['pizza', -9, -180, 333, 427],
-      ['cherries', 1306, 27, 367, 549],
-      ['bunny', -4, 659, 439, 605],
-      ['lightning', 1253, 530, 348, 459],
-      ['tomato', 573, 791, 269, 326],
-      ['dollar', 130, 284, 76, 127],
-      ['ruble', 954, 345, 97, 109],
-      ['yen', 1356, 837, 88, 110],
-      ['euro', 363, 795, 85, 112],
-      ['order-now', 260, 193, 426, 226],
-      ['mwah', 126, 351, 481, 355],
-      ['hotdog', 692, 27, 249, 307],
-      ['deal', 991, 127, 325, 209],
-      ['fukus', 488, 575, 266, 210],
-      ['sale', 955, 401, 304, 321],
-      ['go', 813, 610, 311, 228],
+      ['pound', 1266.2, 13.8, 81, 111],
+      ['pizza', 11.2, -159.5, 293, 386],
+      ['cherries', 1349.4, 47.5, 303, 509],
+      ['bunny', 16.5, 754.8, 399, 490],
+      ['lightning', 1265.2, 604.9, 324, 373],
+      ['tomato', 582.7, 833.2, 251, 274],
+      ['dollar', 130.8, 282, 75, 126],
+      ['ruble', 958.1, 345.7, 96, 108],
+      ['yen', 1352.3, 837.9, 87, 109],
+      ['euro', 361.2, 794.9, 84, 111],
+      ['order-now', 253.6, 193.1, 425, 225],
+      ['mwah', 151.6, 348.1, 481, 360],
+      ['hotdog', 684.1, 11.8, 268, 332],
+      ['deal', 995.3, 129.1, 324, 208],
+      ['fukus', 488.6, 582.4, 265, 195],
+      ['sale', 984, 401.1, 307, 321],
+      ['go', 850.1, 592.7, 319, 262],
     ],
     // Order Now!!! or GO would show up twice (in the middle and in the pile), so their
     // copy in the pile is swapped for Today Sale, centred on the copy's spot
     standIns: {
-      'order-now': [316.5, 223, 313, 166],
-      go: [812, 641, 313, 166],
+      'order-now': [319.2, 227.4, 294, 156],
+      go: [862.8, 645.7, 294, 156],
     },
   },
   // "iPhone 13 & 14 - 6" 426:1786, 390 x 844: nine of the same stickers, same sizes
@@ -406,15 +406,15 @@ const BURST_LAYOUTS = {
     top: 0,
     height: 844,
     stickers: [
-      ['mwah', 4, 362.96, 481, 355],
-      ['hotdog', 180.36, 684.43, 249, 307],
-      ['dollar', -28.24, 404.18, 76, 127],
-      ['euro', 13.15, -27, 85, 112],
-      ['ruble', 28.74, 721.55, 97, 109],
-      ['pound', 301.82, 565.98, 82, 112],
-      ['yen', 341, 287.01, 88, 110],
-      ['sale', 93.89, -46.38, 304, 321],
-      ['deal', -159.38, 141.56, 325, 209],
+      ['mwah', 29.6, 360.1, 481, 360],
+      ['hotdog', 172.5, 669.2, 268, 332],
+      ['dollar', -27.4, 402.2, 75, 126],
+      ['euro', 11.4, -27.1, 84, 111],
+      ['ruble', 32.9, 722.2, 96, 108],
+      ['pound', 302, 565.8, 81, 111],
+      ['yen', 337.3, 288, 87, 109],
+      ['sale', 122.9, -46.3, 307, 321],
+      ['deal', -155, 143.7, 324, 208],
     ],
     standIns: {},
   },
@@ -461,10 +461,10 @@ function buildBurst() {
     return item
   }
   layout.stickers.forEach(([name, ...box], index) => {
-    addItem(`assets/images/burst/${name}.svg?v=20261108-1`, box, index, index).dataset.name = name
+    addItem(`assets/images/burst/${name}.svg?v=20261108-2`, box, index, index).dataset.name = name
     const standIn = layout.standIns[name]
     if (standIn) {
-      const item = addItem('assets/images/sticker-today-sale.svg?v=20261108-1', standIn, index, `${index}t`)
+      const item = addItem('assets/images/sticker-today-sale.svg?v=20261108-2', standIn, index, `${index}t`)
       item.dataset.standsIn = name
       item.hidden = true
     }
@@ -545,6 +545,112 @@ isPhone.addEventListener('change', () => {
   burst = null
 })
 canHoverBurst.addEventListener('change', endBurst)
+
+// Haze: text below the haze line (HAZE_LINE of the way down the screen) is grey;
+// once a line scrolls above it, it turns black (see .haze-on in the CSS).
+// Every word gets its own span, so the words of one line flip together; the ===== rules,
+// the buttons, the black day blocks and the +++ / ----- rows drawn by ::before / ::after
+// count as lines too.
+// Near the end of the page the line slides down to the bottom of the screen, so the last
+// lines turn black as well
+const HAZE_LINE = 0.7
+const HAZE_ROOTS = '.workshop, .stack'
+// one line as a whole: the rules, the buttons and the black day blocks (grey in Figma)
+const HAZE_WHOLE = '.rule, .crew__link, .buy__link, .ask, .wday__name, .wday__range'
+const HAZE_SKIP = `.order, .buy__top, .bag, svg, ${HAZE_WHOLE}`  // no words wrapped inside
+const hazeLines = []  // { el, cls, edge: 'middle' | 'top' | 'bottom', y, isRead }
+
+function wrapWords(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: node => (node.parentElement.closest(HAZE_SKIP) || !node.data.trim()
+      ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  })
+  const texts = []
+  while (walker.nextNode()) texts.push(walker.currentNode)
+  for (const text of texts) {
+    // split at ordinary spaces only: a non-breaking space keeps its words together
+    const parts = text.data.split(/([ \t\n\r]+)/)
+    const frag = document.createDocumentFragment()
+    for (const part of parts) {
+      if (!part) continue
+      if (/^[ \t\n\r]+$/.test(part)) {
+        frag.append(part)
+        continue
+      }
+      const word = document.createElement('span')
+      word.className = 'hz'
+      word.textContent = part
+      frag.append(word)
+      hazeLines.push({ el: word, cls: 'is-read', edge: 'middle' })
+    }
+    text.replaceWith(frag)
+  }
+}
+
+function setupHaze() {
+  const roots = document.querySelectorAll(HAZE_ROOTS)
+  for (const root of roots) {
+    wrapWords(root)
+    for (const el of root.querySelectorAll(HAZE_WHOLE)) {
+      el.classList.add('hz')
+      hazeLines.push({ el, cls: 'is-read', edge: 'middle' })
+    }
+    // +++ above and ----- under some blocks: their own lines, at the block's top / bottom
+    for (const el of root.querySelectorAll('*')) {
+      if (el.closest(HAZE_SKIP)) continue
+      if (getComputedStyle(el, '::before').content !== 'none') {
+        el.classList.add('hz-before')
+        hazeLines.push({ el, cls: 'is-read-before', edge: 'top' })
+      }
+      if (getComputedStyle(el, '::after').content !== 'none') {
+        el.classList.add('hz-after')
+        hazeLines.push({ el, cls: 'is-read-after', edge: 'bottom' })
+      }
+    }
+  }
+  document.documentElement.classList.add('haze-on')
+}
+
+// Page positions, measured again only when the layout changes
+function measureHaze() {
+  for (const line of hazeLines) {
+    const box = line.el.getBoundingClientRect()
+    const y = line.edge === 'top' ? box.top + 10
+      : line.edge === 'bottom' ? box.bottom - 10
+      : (box.top + box.bottom) / 2
+    line.y = y + scrollY
+  }
+  updateHaze()
+}
+
+function updateHaze() {
+  const screen = innerHeight
+  const endZone = screen * (1 - HAZE_LINE)
+  const left = document.documentElement.scrollHeight - (scrollY + screen)
+  const share = left < endZone ? 1 - (left / endZone) * (1 - HAZE_LINE) : HAZE_LINE
+  const hazeY = scrollY + screen * share
+  for (const line of hazeLines) {
+    const isRead = line.y < hazeY
+    if (isRead === line.isRead) continue
+    line.isRead = isRead
+    line.el.classList.toggle(line.cls, isRead)
+  }
+}
+
+let hazeFrame = 0
+const queueHaze = () => {
+  if (!hazeFrame) hazeFrame = requestAnimationFrame(() => {
+    hazeFrame = 0
+    updateHaze()
+  })
+}
+
+setupHaze()
+measureHaze()
+addEventListener('scroll', queueHaze, { passive: true })
+new ResizeObserver(() => measureHaze()).observe(document.body)
+document.fonts.ready.then(measureHaze)
+addEventListener('load', measureHaze)
 addEventListener('load', () => {
   const later = window.requestIdleCallback || (fn => setTimeout(fn, 300))
   later(buildBurst)
