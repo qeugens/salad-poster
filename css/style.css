@@ -1814,13 +1814,6 @@ a:focus-visible .swap__alt {
     opacity 0.12s linear calc(var(--i) * 22ms);
 }
 
-/* Landed: no transform and no transition, so the browser paints it as a still, sharp
-   picture (see settleBurstItem in js/script.js) */
-.burst.is-on .burst__item.is-settled {
-  transform: none;
-  transition: none;
-}
-
 .order.is-bursting {
   z-index: 21;
 }

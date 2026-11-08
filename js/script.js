@@ -429,8 +429,10 @@ let burstBackTimer = 0
 
 const burstModeNow = () => (isPhone.matches ? 'phone' : 'desktop')
 
-// Built after the page has loaded (the stickers are heavy), for the current layout only,
-// and drawn inline so they stay sharp while they scale
+// Built after the page has loaded, for the current layout only. The stickers are plain
+// <img>s (they have no masks or filters, so Safari draws them sharp): a browser paints an
+// image once and then only moves it, which keeps the flight smooth in Safari and on
+// phones, where inline SVG was repainted path by path
 function buildBurst() {
   const mode = burstModeNow()
   if (burst && burstMode === mode) return
@@ -441,7 +443,7 @@ function buildBurst() {
   burst.className = 'burst'
   burst.setAttribute('aria-hidden', 'true')
   burst.style.setProperty('--last', layout.stickers.length - 1)
-  const addItem = (src, [x, y, w, h], index, key) => {
+  const addItem = (src, [x, y, w, h], index) => {
     const item = document.createElement('div')
     item.className = 'burst__item'
     item.style.left = `${(x / layout.width) * 100}vw`
@@ -454,17 +456,17 @@ function buildBurst() {
     const img = document.createElement('img')
     img.src = src
     img.alt = ''
+    img.decoding = 'async'
+    img.decode?.().catch(() => {})  // ready before the first burst, no paint mid-flight
     item.append(img)
-    item.addEventListener('transitionend', settleBurstItem)
     burst.append(item)
-    inlineSvg(img, `b${key}-`)
     return item
   }
   layout.stickers.forEach(([name, ...box], index) => {
-    addItem(`assets/images/burst/${name}.svg?v=20261108-2`, box, index, index).dataset.name = name
+    addItem(`assets/images/burst/${name}.svg?v=20261108-2`, box, index).dataset.name = name
     const standIn = layout.standIns[name]
     if (standIn) {
-      const item = addItem('assets/images/sticker-today-sale.svg?v=20261108-2', standIn, index, `${index}t`)
+      const item = addItem('assets/images/sticker-today-sale.svg?v=20261108-2', standIn, index)
       item.dataset.standsIn = name
       item.hidden = true
     }
@@ -494,24 +496,9 @@ function startBurst(sticker) {
   requestAnimationFrame(() => burst.classList.add('is-on'))
 }
 
-// Safari and Arc paint a sticker once at the tiny size it flies out from and then only
-// stretch that picture, so it lands blurry. Once a sticker has landed it drops its
-// animation (.is-settled: no transform, no transition) and its SVG is swapped for a fresh
-// copy, which the browser paints anew at full size, sharp
-function settleBurstItem(event) {
-  const item = event.currentTarget
-  if (event.target !== item || event.propertyName !== 'transform') return
-  if (!burst.classList.contains('is-on') || item.classList.contains('is-settled')) return
-  item.classList.add('is-settled')
-  const art = item.firstElementChild
-  if (art) art.replaceWith(art.cloneNode(true))
-}
-
 // The sticker stays on top until the last one has flown back in behind it
 function endBurst() {
   if (!burst?.classList.contains('is-on')) return
-  // back to the animated state first, so the flight back is the same spring
-  for (const item of burst.children) item.classList.remove('is-settled')
   burst.classList.remove('is-on')
   clearTimeout(burstBackTimer)
   const backMs = (burst.children.length - 1) * STICKER_STAGGER_MS + STICKER_SPRING_MS
