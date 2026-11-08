@@ -496,19 +496,23 @@ isPhone.addEventListener('change', () => {
 })
 canHoverBurst.addEventListener('change', endBurst)
 
-// Haze: text below the haze line (HAZE_LINE of the way down the screen) is grey;
-// once a line scrolls above it, it turns black (see .haze-on in the CSS).
+// Haze: text below the haze line (HAZE_LINE of the way down the screen) is grey, in six
+// steps (HAZE_GREYS): light grey at the bottom of the screen, darker band by band up to
+// the line; once a line scrolls above it, it turns black (see .haze-on in the CSS).
 // Every word gets its own span, so the words of one line flip together; the ===== rules,
 // the buttons, the black day blocks and the +++ / ----- rows drawn by ::before / ::after
 // count as lines too.
 // Near the end of the page the line slides down to the bottom of the screen, so the last
 // lines turn black as well
-const HAZE_LINE = 0.7
+const HAZE_LINE = 0.8
+// Opacity of each grey band, from just under the line down to the bottom of the screen:
+// 0.8 turns the #1a1a1a text into a dark grey (#4d4d4d), 0.4 into a mid grey (#929292)
+const HAZE_GREYS = [0.8, 0.72, 0.64, 0.56, 0.48, 0.4]
 const HAZE_ROOTS = '.workshop, .stack'
 // one line as a whole: the rules, the buttons and the black day blocks (grey in Figma)
 const HAZE_WHOLE = '.rule, .crew__link, .buy__link, .ask, .wday__name, .wday__range'
 const HAZE_SKIP = `.order, .buy__top, .bag, svg, ${HAZE_WHOLE}`  // no words wrapped inside
-const hazeLines = []  // { el, cls, edge: 'middle' | 'top' | 'bottom', y, isRead }
+const hazeLines = []  // { el, prop: the CSS variable it sets, edge: 'middle' | 'top' | 'bottom', y, look }
 
 function wrapWords(root) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
@@ -531,7 +535,7 @@ function wrapWords(root) {
       word.className = 'hz'
       word.textContent = part
       frag.append(word)
-      hazeLines.push({ el: word, cls: 'is-read', edge: 'middle' })
+      hazeLines.push({ el: word, prop: '--hz', edge: 'middle' })
     }
     text.replaceWith(frag)
   }
@@ -543,18 +547,18 @@ function setupHaze() {
     wrapWords(root)
     for (const el of root.querySelectorAll(HAZE_WHOLE)) {
       el.classList.add('hz')
-      hazeLines.push({ el, cls: 'is-read', edge: 'middle' })
+      hazeLines.push({ el, prop: '--hz', edge: 'middle' })
     }
     // +++ above and ----- under some blocks: their own lines, at the block's top / bottom
     for (const el of root.querySelectorAll('*')) {
       if (el.closest(HAZE_SKIP)) continue
       if (getComputedStyle(el, '::before').content !== 'none') {
         el.classList.add('hz-before')
-        hazeLines.push({ el, cls: 'is-read-before', edge: 'top' })
+        hazeLines.push({ el, prop: '--hz-before', edge: 'top' })
       }
       if (getComputedStyle(el, '::after').content !== 'none') {
         el.classList.add('hz-after')
-        hazeLines.push({ el, cls: 'is-read-after', edge: 'bottom' })
+        hazeLines.push({ el, prop: '--hz-after', edge: 'bottom' })
       }
     }
   }
@@ -579,11 +583,14 @@ function updateHaze() {
   const left = document.documentElement.scrollHeight - (scrollY + screen)
   const share = left < endZone ? 1 - (left / endZone) * (1 - HAZE_LINE) : HAZE_LINE
   const hazeY = scrollY + screen * share
+  // the rest of the screen below the line, split into one band per grey
+  const band = Math.max(1, (screen * (1 - share)) / HAZE_GREYS.length)
   for (const line of hazeLines) {
-    const isRead = line.y < hazeY
-    if (isRead === line.isRead) continue
-    line.isRead = isRead
-    line.el.classList.toggle(line.cls, isRead)
+    const below = line.y - hazeY
+    const look = below < 0 ? 1 : HAZE_GREYS[Math.min(HAZE_GREYS.length - 1, Math.floor(below / band))]
+    if (look === line.look) continue
+    line.look = look
+    line.el.style.setProperty(line.prop, look)
   }
 }
 

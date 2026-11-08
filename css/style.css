@@ -1715,29 +1715,27 @@ a:focus-visible .swap__alt {
   }
 }
 
-/* Haze (Figma "screen" 161:1086): text in the lower part of the screen is grey; each
-   line turns black as it scrolls up past the haze line, and back again on the way down. js/script.js wraps the words (.hz; words on one line flip
-   together), marks the ===== rules, buttons and black day blocks as lines of their own,
-   and the +++ / ----- rows drawn by ::before / ::after (.hz-before / .hz-after). Only
-   with JS on (.haze-on).
-   0.74 opacity turns the #1a1a1a text into Figma's grey #545454 on the #fafafa page */
+/* Haze (Figma "screen" 161:1086): text in the lower part of the screen is grey, in six
+   steps from mid grey at the bottom up to a dark grey just under the haze line; each
+   line turns black as it scrolls up past the line, and back again on the way down.
+   js/script.js wraps the words (.hz; words on one line change together), marks the =====
+   rules, buttons and black day blocks as lines of their own, and the +++ / ----- rows
+   drawn by ::before / ::after (.hz-before / .hz-after), and sets each line's opacity
+   (--hz / --hz-before / --hz-after; the greys are HAZE_GREYS there). Only with JS on
+   (.haze-on) */
 .haze-on {
-  --haze-opacity: 0.74;
   --haze-ms: 450ms;
 }
 
 .haze-on .hz,
 .haze-on .hz-before::before,
 .haze-on .hz-after::after {
-  opacity: var(--haze-opacity);
   transition: opacity var(--haze-ms) ease;
 }
 
-.haze-on .hz.is-read,
-.haze-on .hz-before.is-read-before::before,
-.haze-on .hz-after.is-read-after::after {
-  opacity: 1;
-}
+.haze-on .hz { opacity: var(--hz, 0.4); }
+.haze-on .hz-before::before { opacity: var(--hz-before, 0.4); }
+.haze-on .hz-after::after { opacity: var(--hz-after, 0.4); }
 
 @media (prefers-reduced-motion: reduce) {
   .haze-on .hz,
