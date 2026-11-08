@@ -377,7 +377,7 @@ const BURST_LAYOUTS = {
     stickers: [
       ['pound', 1266, 14, 82, 112],
       ['pizza', -9, -180, 333, 427],
-      ['cherries', 1303, 27, 382, 550],
+      ['cherries', 1306, 27, 367, 549],
       ['bunny', -4, 659, 439, 605],
       ['lightning', 1253, 530, 348, 459],
       ['tomato', 573, 791, 269, 326],
@@ -461,7 +461,7 @@ function buildBurst() {
     return item
   }
   layout.stickers.forEach(([name, ...box], index) => {
-    addItem(`assets/images/burst/${name}.svg?v=20261105-13`, box, index, index).dataset.name = name
+    addItem(`assets/images/burst/${name}.svg?v=20261106-1`, box, index, index).dataset.name = name
     const standIn = layout.standIns[name]
     if (standIn) {
       const item = addItem('assets/images/sticker-today-sale.svg?v=20261105-12', standIn, index, `${index}t`)
