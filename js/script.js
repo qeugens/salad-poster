@@ -1,40 +1,3 @@
-// Grid overlay (off by default): G toggles the columns, M the module grid. The choice is remembered.
-const overlay = {
-  columns: document.querySelector('.grid-overlay__columns'),
-  module: document.querySelector('.grid-overlay__module'),
-}
-const keys = { g: 'columns', m: 'module' }
-
-function load(name) {
-  try {
-    return localStorage.getItem(`grid-${name}`) === 'on'
-  } catch {
-    return false
-  }
-}
-
-function save(name, isOn) {
-  try {
-    localStorage.setItem(`grid-${name}`, isOn ? 'on' : 'off')
-  } catch {}
-}
-
-// ?grid=off in the URL hides the overlay without changing the saved choice
-const isForcedOff = new URLSearchParams(location.search).get('grid') === 'off'
-
-for (const name of Object.keys(overlay)) {
-  overlay[name].hidden = isForcedOff || !load(name)
-}
-
-document.addEventListener('keydown', event => {
-  const name = keys[event.key.toLowerCase()]
-  const isTyping = event.target.closest('input, textarea, [contenteditable]')
-  if (!name || isTyping || event.metaKey || event.ctrlKey || event.altKey) return
-
-  overlay[name].hidden = !overlay[name].hidden
-  save(name, !overlay[name].hidden)
-})
-
 // Always open at the very top, zigzag and all: browsers (Safari on iPhone above all) put
 // a reloaded or reopened page back where it was scrolled. A link to a #spot still works
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
@@ -419,7 +382,7 @@ const BURST_LAYOUTS = {
     standIns: {},
   },
 }
-const STICKER_SPRING_MS = 620
+const STICKER_SPRING_MS = 450
 const STICKER_STAGGER_MS = 22
 const burstTriggers = document.querySelectorAll('.order')
 const canHoverBurst = matchMedia('(hover: hover) and (min-width: 771px)')
