@@ -674,3 +674,57 @@ if (document.documentElement.classList.contains('is-typing')) {
   // Wait for the fonts (at most 800ms) so letters do not switch font mid-typing
   Promise.race([document.fonts.ready, new Promise(done => setTimeout(done, 800))]).then(typeIn)
 }
+
+// Idle glitch: while the page is open, random letters of the visible text flip to a
+// symbol (GLITCH_SYMBOLS) in a random project colour for a moment, then come back. Only
+// the monospace text (GT Pressura Mono) takes part, so a swapped letter never moves the
+// layout. Starts after the typing intro; rests while the tab is hidden; off for reduced
+// motion
+const GLITCH_SYMBOLS = [...'!@#$%^&*()_+=-']
+const GLITCH_EVERY_MS = [1000, 3000]  // wait before the next flip (random in between)
+const GLITCH_HOLD_MS = [120, 320]   // how long a flipped letter stays (random in between)
+const GLITCH_START_MS = 1500        // after the fonts are in, past the typing intro
+const pick = list => list[Math.floor(Math.random() * list.length)]
+const glitching = new Set()
+let glitchWords = []
+
+function glitchOnce() {
+  if (document.hidden || !glitchWords.length) return
+  for (let tries = 0; tries < 12; tries++) {
+    const word = pick(glitchWords)
+    if (glitching.has(word)) continue
+    const box = word.getBoundingClientRect()
+    if (!box.width || box.bottom < 0 || box.top > innerHeight) continue
+    const text = word.textContent
+    const chars = [...text]
+    const spots = chars.flatMap((char, i) => (/\S/.test(char) ? [i] : []))
+    if (!spots.length) continue
+    const at = pick(spots)
+    const symbol = document.createElement('span')
+    symbol.textContent = pick(GLITCH_SYMBOLS)
+    symbol.style.color = pick(TYPE_COLORS)
+    word.replaceChildren(chars.slice(0, at).join(''), symbol, chars.slice(at + 1).join(''))
+    glitching.add(word)
+    const [min, max] = GLITCH_HOLD_MS
+    setTimeout(() => {
+      word.textContent = text
+      glitching.delete(word)
+    }, min + Math.random() * (max - min))
+    return
+  }
+}
+
+function startGlitch() {
+  glitchWords = [...document.querySelectorAll('.workshop .hz, .stack .hz')].filter(word =>
+    !word.matches(HAZE_WHOLE) && getComputedStyle(word).fontFamily.includes('Pressura'))
+  const [min, max] = GLITCH_EVERY_MS
+  const next = () => setTimeout(() => {
+    glitchOnce()
+    next()
+  }, min + Math.random() * (max - min))
+  next()
+}
+
+if (!reduceMotion.matches) {
+  document.fonts.ready.then(() => setTimeout(startGlitch, GLITCH_START_MS))
+}
