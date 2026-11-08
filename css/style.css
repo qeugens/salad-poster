@@ -1841,3 +1841,53 @@ a:focus-visible .swap__alt {
   to   { clip-path: inset(0); }
 }
 
+
+/* Idle stickers (js/script.js): the pile that lands while nobody touches the page, over
+   the content and the bag, under the sticker burst. Each pops in with the spring; at the
+   first touch they all fall off the bottom of the screen, speeding up like a drop, each
+   with its own delay, time and spin (--fall-delay / --fall-ms / --fall-turn) */
+.idle-stickers {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.idle-sticker {
+  position: absolute;
+  max-width: none;
+  height: auto;
+  translate: -50% -50%;
+  rotate: var(--turn);
+  animation: idle-pop 0.35s var(--spring-ease) both;
+}
+
+@keyframes idle-pop {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+}
+
+.idle-stickers.is-leaving .idle-sticker {
+  animation: idle-fall var(--fall-ms, 700ms) cubic-bezier(0.55, 0, 1, 0.45) var(--fall-delay, 0ms) forwards;
+}
+
+@keyframes idle-fall {
+  to {
+    translate: -50% calc(-50% + 120vh);
+    rotate: calc(var(--turn) + var(--fall-turn, 0deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idle-sticker,
+  .idle-stickers.is-leaving .idle-sticker {
+    animation: none;
+  }
+
+  .idle-stickers.is-leaving {
+    opacity: 0;
+  }
+}

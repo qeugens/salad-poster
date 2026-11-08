@@ -728,3 +728,77 @@ function startGlitch() {
 if (!reduceMotion.matches) {
   document.fonts.ready.then(() => setTimeout(startGlitch, GLITCH_START_MS))
 }
+
+// Idle stickers: after IDLE_AFTER_MS without any interaction, stickers start landing on
+// the screen one after another, at random spots and tilts, piling over each other, for
+// as long as nobody touches the page. Any mouse move, scroll, tap or key drops the pile:
+// the stickers fall off the bottom of the screen, and the wait starts over. The oldest go once there are IDLE_MAX, so it can run forever
+const IDLE_AFTER_MS = 40000
+const IDLE_EVERY_MS = [1200, 2500]  // wait before the next sticker (random in between)
+const IDLE_MAX = 150
+const IDLE_TURN_DEG = 25          // tilt, either way
+const IDLE_FALL_MS = [400, 600]   // how long one takes to fall off the screen
+const IDLE_FALL_STAGGER_MS = 150  // they don't all let go at once
+const IDLE_STICKERS = [
+  ...BURST_LAYOUTS.desktop.stickers.map(([name, , , w]) => [`assets/images/burst/${name}.svg?v=20261108-2`, w]),
+  ['assets/images/sticker-today-sale.svg?v=20261108-2', 294],
+]
+let idleTimer = 0
+let idleLoop = 0
+let idleLayer = null
+
+function idleStick() {
+  if (!idleLayer) return
+  const [src, width] = pick(IDLE_STICKERS)
+  const sticker = document.createElement('img')
+  sticker.className = 'idle-sticker'
+  sticker.src = src
+  sticker.alt = ''
+  // Figma size on a 1512px screen, smaller on narrower ones (not below 45%)
+  sticker.style.width = `${width * Math.min(1, Math.max(0.45, innerWidth / 1512))}px`
+  sticker.style.left = `${Math.random() * 100}%`
+  sticker.style.top = `${Math.random() * 100}%`
+  sticker.style.setProperty('--turn', `${((Math.random() * 2 - 1) * IDLE_TURN_DEG).toFixed(1)}deg`)
+  idleLayer.append(sticker)
+  while (idleLayer.childElementCount > IDLE_MAX) idleLayer.firstElementChild.remove()
+  const [min, max] = IDLE_EVERY_MS
+  idleLoop = setTimeout(idleStick, min + Math.random() * (max - min))
+}
+
+function startIdle() {
+  idleLayer = document.createElement('div')
+  idleLayer.className = 'idle-stickers'
+  idleLayer.setAttribute('aria-hidden', 'true')
+  document.body.append(idleLayer)
+  idleStick()
+}
+
+function stopIdle() {
+  clearTimeout(idleLoop)
+  if (!idleLayer) return
+  const layer = idleLayer
+  idleLayer = null
+  // each falls in its own time, with a last little spin
+  let longest = 0
+  for (const sticker of layer.children) {
+    const delay = Math.random() * IDLE_FALL_STAGGER_MS
+    const time = IDLE_FALL_MS[0] + Math.random() * (IDLE_FALL_MS[1] - IDLE_FALL_MS[0])
+    sticker.style.setProperty('--fall-delay', `${delay}ms`)
+    sticker.style.setProperty('--fall-ms', `${time}ms`)
+    sticker.style.setProperty('--fall-turn', `${((Math.random() * 2 - 1) * 40).toFixed(1)}deg`)
+    longest = Math.max(longest, delay + time)
+  }
+  layer.classList.add('is-leaving')
+  setTimeout(() => layer.remove(), longest + 50)
+}
+
+function wake() {
+  stopIdle()
+  clearTimeout(idleTimer)
+  idleTimer = setTimeout(startIdle, IDLE_AFTER_MS)
+}
+
+for (const type of ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll']) {
+  addEventListener(type, wake, { passive: true })
+}
+wake()
