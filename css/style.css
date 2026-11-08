@@ -1803,3 +1803,41 @@ a:focus-visible .swap__alt {
     transition: opacity 0.2s linear;
   }
 }
+
+/* Typing intro (from the typing-intro branch): on load the workshop strip and intro text
+   type themselves in, letter by letter in a loose, shuffled order (js/script.js splits
+   the text into .type-char). .is-typing is set in the <head> */
+.is-typing .workshop,
+.is-typing .intro {
+  visibility: hidden;
+}
+
+.type-char {
+  opacity: 0;
+  /* shows up at its moment, in its colour (--tint) for 200ms (TYPE_TINT_MS), then the
+     tint animation ends and the letter takes the text colour */
+  animation:
+    type-in 1ms linear var(--delay) forwards,
+    type-tint 200ms steps(1) var(--delay);
+}
+
+@keyframes type-tint {
+  from, to { color: var(--tint); }
+}
+
+/* The = rules are drawn by CSS, so they type left to right in steps instead, starting
+   80% drawn, like the letters that are already there */
+.is-typing-run .workshop .rule,
+.is-typing-run .intro .rule {
+  animation: rule-type 0.3s steps(4) var(--delay, 0s) both;
+}
+
+@keyframes type-in {
+  to { opacity: 1; }
+}
+
+@keyframes rule-type {
+  from { clip-path: inset(0 20% 0 0); }
+  to   { clip-path: inset(0); }
+}
+

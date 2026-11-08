@@ -605,3 +605,72 @@ addEventListener('load', () => {
   const later = window.requestIdleCallback || (fn => setTimeout(fn, 300))
   later(buildBurst)
 })
+
+// Typing intro: in the first second the workshop strip and the intro text appear letter
+// by letter. Letters roughly follow reading order but each gets a random nudge, so they
+// pop in scattered, like fast messy typing. Most of the letters (80%) are there from the
+// start (TYPE_SHOWN), so only the rest type in, each in a random colour of the project (TYPE_COLORS) that turns
+// into the text colour a moment later. Afterwards the original text goes back.
+// (From the typing-intro branch, Oct 28.)
+const TYPE_BLOCKS = '.workshop, .intro'
+const TYPE_ORDER_MS = 420   // spread along reading order
+const TYPE_JITTER_MS = 240  // random nudge per letter
+const TYPE_TINT_MS = 200    // a typed letter shows in a colour this long, then turns text colour
+// The colours of the project: the crew cards and the SALAD letters' hover looks
+const TYPE_COLORS = ['#ff9633', '#f74980', '#ff66ca', '#00aa58', '#0083fe', '#fb5e24', '#18c1f0', '#1164ff', '#00d4fe', '#fe9ace', '#7200fe', '#6a4336']
+const RULE_JITTER_MS = 250
+const TYPE_SHOWN = 0.8      // share of letters already there; only the rest (20%) type in
+
+function typeIn() {
+  const root = document.documentElement
+  const runs = []
+  const chars = []
+
+  for (const block of document.querySelectorAll(TYPE_BLOCKS)) {
+    const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT)
+    const nodes = []
+    while (walker.nextNode()) {
+      if (walker.currentNode.textContent.trim()) nodes.push(walker.currentNode)
+    }
+
+    for (const node of nodes) {
+      const run = document.createElement('span')
+      for (const char of node.textContent) {
+        // spaces, and about half of the letters, are there from the start
+        if (/\s/.test(char) || Math.random() < TYPE_SHOWN) {
+          run.append(char)
+          continue
+        }
+        const span = document.createElement('span')
+        span.className = 'type-char'
+        span.textContent = char
+        run.append(span)
+        chars.push(span)
+      }
+      node.replaceWith(run)
+      runs.push([run, node])
+    }
+
+    for (const rule of block.querySelectorAll('.rule')) {
+      rule.style.setProperty('--delay', `${Math.random() * RULE_JITTER_MS}ms`)
+    }
+  }
+
+  chars.forEach((span, i) => {
+    const delay = (i / chars.length) * TYPE_ORDER_MS + Math.random() * TYPE_JITTER_MS
+    span.style.setProperty('--delay', `${delay}ms`)
+    span.style.setProperty('--tint', TYPE_COLORS[Math.floor(Math.random() * TYPE_COLORS.length)])
+  })
+
+  root.classList.replace('is-typing', 'is-typing-run')
+
+  setTimeout(() => {
+    for (const [run, node] of runs) run.replaceWith(node)
+    root.classList.remove('is-typing-run')
+  }, TYPE_ORDER_MS + TYPE_JITTER_MS + TYPE_TINT_MS + 150)
+}
+
+if (document.documentElement.classList.contains('is-typing')) {
+  // Wait for the fonts (at most 800ms) so letters do not switch font mid-typing
+  Promise.race([document.fonts.ready, new Promise(done => setTimeout(done, 800))]).then(typeIn)
+}

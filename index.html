@@ -6,6 +6,14 @@
   <!-- Black status bar on phones: theme-color for browsers, the other for a home-screen app -->
   <meta name="theme-color" content="#1a1a1a">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <!-- Hide the first section's text until the typing intro (js/script.js) takes over;
+       shown anyway after 3s in case the script never runs -->
+  <script>
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('is-typing')
+      setTimeout(() => document.documentElement.classList.remove('is-typing'), 3000)
+    }
+  </script>
   <!-- Cursive tab name from Unicode script letters; the plain name stays in the description for search -->
   <title>𝒮𝒜ℒ𝒜𝒟*𝒲𝒪ℛ𝒦𝒮ℋ𝒪𝒫</title>
   <meta name="description" content="SALAD*WORKSHOP — онлайн-воркшоп от Shoplift и Käik: салат как композиционная структура">
@@ -21,7 +29,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Monofett&display=swap">
   <!-- ?v= changes with every update, so browsers fetch the new files instead of cached ones -->
   <link rel="stylesheet" href="css/fonts.css?v=20261108-1">
-  <link rel="stylesheet" href="css/style.css?v=20261108-10">
+  <link rel="stylesheet" href="css/style.css?v=20261108-17">
 </head>
 <body>
   <div class="status-tint" aria-hidden="true"></div>
@@ -355,6 +363,6 @@
   <!-- 4. Full-screen black ending (hidden for now: remove `hidden` to bring it back) -->
   <section class="blackout" id="end" aria-hidden="true" hidden></section>
 
-  <script src="js/script.js?v=20261108-10"></script>
+  <script src="js/script.js?v=20261108-17"></script>
 </body>
 </html>
