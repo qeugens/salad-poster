@@ -341,14 +341,14 @@ const BURST_LAYOUTS = {
       ['pound', 1266.2, 13.8, 81, 111],
       ['pizza', 11.2, -159.5, 293, 386],
       ['cherries', 1349.4, 47.5, 303, 509],
-      ['bunny', 16.5, 754.8, 399, 490],
-      ['lightning', 1265.2, 604.9, 324, 373],
+      ['bunny', 4.1, 748.1, 425, 525],
+      ['lightning', 1265.2, 604.9, 346, 373],
       ['tomato', 582.7, 833.2, 251, 274],
       ['dollar', 130.8, 282, 75, 126],
       ['ruble', 958.1, 345.7, 96, 108],
       ['yen', 1352.3, 837.9, 87, 109],
       ['euro', 361.2, 794.9, 84, 111],
-      ['order-now', 253.6, 193.1, 425, 225],
+      ['order-now', 247.1, 193.1, 431, 230],
       ['mwah', 151.6, 348.1, 481, 360],
       ['hotdog', 684.1, 11.8, 268, 332],
       ['deal', 995.3, 129.1, 324, 208],
@@ -426,7 +426,7 @@ function buildBurst() {
     return item
   }
   layout.stickers.forEach(([name, ...box], index) => {
-    addItem(`assets/images/burst/${name}.svg?v=20261108-2`, box, index).dataset.name = name
+    addItem(`assets/images/burst/${name}.svg?v=20261108-4`, box, index).dataset.name = name
     const standIn = layout.standIns[name]
     if (standIn) {
       const item = addItem('assets/images/sticker-today-sale.svg?v=20261108-2', standIn, index)
@@ -740,7 +740,7 @@ const IDLE_TURN_DEG = 25          // tilt, either way
 const IDLE_FALL_MS = [400, 600]   // how long one takes to fall off the screen
 const IDLE_FALL_STAGGER_MS = 150  // they don't all let go at once
 const IDLE_STICKERS = [
-  ...BURST_LAYOUTS.desktop.stickers.map(([name, , , w]) => [`assets/images/burst/${name}.svg?v=20261108-2`, w]),
+  ...BURST_LAYOUTS.desktop.stickers.map(([name, , , w]) => [`assets/images/burst/${name}.svg?v=20261108-4`, w]),
   ['assets/images/sticker-today-sale.svg?v=20261108-2', 294],
 ]
 let idleTimer = 0
