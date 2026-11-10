@@ -28,8 +28,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Monofett&display=swap">
   <!-- ?v= changes with every update, so browsers fetch the new files instead of cached ones -->
-  <link rel="stylesheet" href="css/fonts.css?v=20261108-1">
-  <link rel="stylesheet" href="css/style.css?v=20261108-27">
+  <link rel="stylesheet" href="css/fonts.css?v=20261110-1">
+  <link rel="stylesheet" href="css/style.css?v=20261110-6">
 </head>
 <body>
   <div class="status-tint" aria-hidden="true"></div>
@@ -95,6 +95,42 @@
     <!-- 2. Content: Figma auto layout = vertical flex stack -->
     <main class="content grid">
       <div class="stack">
+        <!-- What a poster and an olivier have in common + the dates (Figma 469:888) -->
+        <section class="olive" aria-labelledby="olive-title">
+          <header class="week__head">
+            <span class="week__bracket" aria-hidden="true">[</span>
+            <div class="week__heading">
+              <h2 class="week__title week__title--center" id="olive-title">Что общего у&nbsp;плаката и&nbsp;оливье?</h2>
+              <span class="rule" aria-hidden="true"></span>
+            </div>
+            <span class="week__bracket" aria-hidden="true">]</span>
+          </header>
+
+          <p class="dates">
+            <img class="dates__stars" src="assets/images/star-column.svg?v=20261110-1" alt="" aria-hidden="true">
+            <time class="dates__day" datetime="11-30"><span class="dates__num">30</span><span class="dates__month">/11</span></time>
+            <span class="dates__dash" aria-hidden="true">—</span>
+            <time class="dates__day dates__day--end" datetime="12-13"><span class="dates__num">13</span><span class="dates__month">/12</span></time>
+            <img class="dates__stars dates__stars--end" src="assets/images/star-column.svg?v=20261110-1" alt="" aria-hidden="true">
+          </p>
+
+          <div class="olive__text">
+            <div class="olive__group">
+              <p>В&nbsp;обоих случаях из&nbsp;набора элементов получается что-то цельное,<br>если правильно</p>
+              <p class="olive__big">нарезать<br>и<br>смешать</p>
+            </div>
+            <p class="olive__plus" aria-hidden="true">+++</p>
+            <div class="olive__group">
+              <p>Воркшоп САЛАТ как раз об&nbsp;этом</p>
+              <p class="olive__big olive__about">как правильно обращаться с&nbsp;визуальными «ингредиентами»</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="order order--fuck-u">
+          <img class="order__art" data-inline-svg src="assets/images/sticker-fuck-u.svg?v=20261110-1" alt="Fuck u!">
+        </div>
+
         <section class="intro">
           <div class="intro__group">
             <section class="topics">
@@ -345,8 +381,8 @@
       <!-- 3. Shopping bag: fixed beside the main content, a poster tucked inside -->
       <aside class="bag" role="button" tabindex="0" aria-label="sale: перейти к покупке">
         <div class="bag__poster">
-          <img class="bag__poster-face" src="assets/images/bag-poster.jpg" alt="Постер Salad workshop">
-          <img class="bag__poster-face bag__poster-face--back" src="assets/images/bag-poster.jpg" alt="">
+          <img class="bag__poster-face" src="assets/images/bag-poster.jpg?v=20261110-1" alt="Постер Salad workshop">
+          <img class="bag__poster-face bag__poster-face--back" src="assets/images/bag-poster.jpg?v=20261110-1" alt="">
         </div>
         <ul class="bag__sale" aria-hidden="true">
           <li>s</li><li>a</li><li>l</li><li>e</li>
@@ -363,6 +399,6 @@
   <!-- 4. Full-screen black ending (hidden for now: remove `hidden` to bring it back) -->
   <section class="blackout" id="end" aria-hidden="true" hidden></section>
 
-  <script src="js/script.js?v=20261108-27"></script>
+  <script src="js/script.js?v=20261110-2"></script>
 </body>
 </html>

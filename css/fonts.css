@@ -81,6 +81,15 @@
   font-display: swap;
 }
 
+/* The big dates (Peter Wiegel, OFL/GPL: free to ship). No Cyrillic, digits and dashes only needed */
+@font-face {
+  font-family: "Knorke";
+  src: url("../assets/fonts/knorke.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Shortcuts: font-family: var(--font-berolina); */
 :root {
   --font-alpha54: "Alpha54", sans-serif;
@@ -93,4 +102,5 @@
   --font-berolina: "Berolina", serif;
   --font-helvetica-rounded: "Helvetica Rounded", Helvetica, Arial, sans-serif;
   --font-schoenschrift: "Lucian Schoenschrift CAT", cursive;
+  --font-knorke: "Knorke", sans-serif;
 }

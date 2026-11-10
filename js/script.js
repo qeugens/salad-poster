@@ -496,27 +496,14 @@ isPhone.addEventListener('change', () => {
 })
 canHoverBurst.addEventListener('change', endBurst)
 
-// Haze: text below the haze line (HAZE_LINE of the way down the screen) is grey, in six
-// steps (HAZE_GREYS): light grey at the bottom of the screen, darker band by band up to
-// the line; once a line scrolls above it, it turns black (see .haze-on in the CSS).
-// Every word gets its own span, so the words of one line flip together; the ===== rules,
-// the buttons, the black day blocks and the +++ / ----- rows drawn by ::before / ::after
-// count as lines too.
-// Near the end of the page the line slides down to the bottom of the screen, so the last
-// lines turn black as well
-const HAZE_LINE = 0.8
-// Opacity of each grey band, from just under the line down to the bottom of the screen:
-// 0.8 turns the #1a1a1a text into a dark grey (#4d4d4d), 0.4 into a mid grey (#929292)
-const HAZE_GREYS = [0.8, 0.72, 0.64, 0.56, 0.48, 0.4]
-const HAZE_ROOTS = '.workshop, .stack'
-// one line as a whole: the rules, the buttons and the black day blocks (grey in Figma)
-const HAZE_WHOLE = '.rule, .crew__link, .buy__link, .ask, .wday__name, .wday__range'
-const HAZE_SKIP = `.order, .buy__top, .bag, svg, ${HAZE_WHOLE}`  // no words wrapped inside
-const hazeLines = []  // { el, prop: the CSS variable it sets, edge: 'middle' | 'top' | 'bottom', y, look }
+// Every word of the text gets its own span, for the idle glitch further down
+const GLITCH_ROOTS = '.workshop, .stack'
+// no words wrapped inside these
+const GLITCH_SKIP = '.order, .buy__top, .bag, svg, .rule, .crew__link, .buy__link, .ask, .wday__name, .wday__range'
 
 function wrapWords(root) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-    acceptNode: node => (node.parentElement.closest(HAZE_SKIP) || !node.data.trim()
+    acceptNode: node => (node.parentElement.closest(GLITCH_SKIP) || !node.data.trim()
       ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
   })
   const texts = []
@@ -532,82 +519,16 @@ function wrapWords(root) {
         continue
       }
       const word = document.createElement('span')
-      word.className = 'hz'
+      word.className = 'glitch-word'
       word.textContent = part
       frag.append(word)
-      hazeLines.push({ el: word, prop: '--hz', edge: 'middle' })
     }
     text.replaceWith(frag)
   }
 }
 
-function setupHaze() {
-  const roots = document.querySelectorAll(HAZE_ROOTS)
-  for (const root of roots) {
-    wrapWords(root)
-    for (const el of root.querySelectorAll(HAZE_WHOLE)) {
-      el.classList.add('hz')
-      hazeLines.push({ el, prop: '--hz', edge: 'middle' })
-    }
-    // +++ above and ----- under some blocks: their own lines, at the block's top / bottom
-    for (const el of root.querySelectorAll('*')) {
-      if (el.closest(HAZE_SKIP)) continue
-      if (getComputedStyle(el, '::before').content !== 'none') {
-        el.classList.add('hz-before')
-        hazeLines.push({ el, prop: '--hz-before', edge: 'top' })
-      }
-      if (getComputedStyle(el, '::after').content !== 'none') {
-        el.classList.add('hz-after')
-        hazeLines.push({ el, prop: '--hz-after', edge: 'bottom' })
-      }
-    }
-  }
-  document.documentElement.classList.add('haze-on')
-}
+document.querySelectorAll(GLITCH_ROOTS).forEach(wrapWords)
 
-// Page positions, measured again only when the layout changes
-function measureHaze() {
-  for (const line of hazeLines) {
-    const box = line.el.getBoundingClientRect()
-    const y = line.edge === 'top' ? box.top + 10
-      : line.edge === 'bottom' ? box.bottom - 10
-      : (box.top + box.bottom) / 2
-    line.y = y + scrollY
-  }
-  updateHaze()
-}
-
-function updateHaze() {
-  const screen = innerHeight
-  const endZone = screen * (1 - HAZE_LINE)
-  const left = document.documentElement.scrollHeight - (scrollY + screen)
-  const share = left < endZone ? 1 - (left / endZone) * (1 - HAZE_LINE) : HAZE_LINE
-  const hazeY = scrollY + screen * share
-  // the rest of the screen below the line, split into one band per grey
-  const band = Math.max(1, (screen * (1 - share)) / HAZE_GREYS.length)
-  for (const line of hazeLines) {
-    const below = line.y - hazeY
-    const look = below < 0 ? 1 : HAZE_GREYS[Math.min(HAZE_GREYS.length - 1, Math.floor(below / band))]
-    if (look === line.look) continue
-    line.look = look
-    line.el.style.setProperty(line.prop, look)
-  }
-}
-
-let hazeFrame = 0
-const queueHaze = () => {
-  if (!hazeFrame) hazeFrame = requestAnimationFrame(() => {
-    hazeFrame = 0
-    updateHaze()
-  })
-}
-
-setupHaze()
-measureHaze()
-addEventListener('scroll', queueHaze, { passive: true })
-new ResizeObserver(() => measureHaze()).observe(document.body)
-document.fonts.ready.then(measureHaze)
-addEventListener('load', measureHaze)
 addEventListener('load', () => {
   const later = window.requestIdleCallback || (fn => setTimeout(fn, 300))
   later(buildBurst)
@@ -619,7 +540,7 @@ addEventListener('load', () => {
 // start (TYPE_SHOWN), so only the rest type in, each in a random colour of the project (TYPE_COLORS) that turns
 // into the text colour a moment later. Afterwards the original text goes back.
 // (From the typing-intro branch, Oct 28.)
-const TYPE_BLOCKS = '.workshop, .intro'
+const TYPE_BLOCKS = '.workshop, .olive, .intro'
 const TYPE_ORDER_MS = 420   // spread along reading order
 const TYPE_JITTER_MS = 240  // random nudge per letter
 const TYPE_TINT_MS = 200    // a typed letter shows in a colour this long, then turns text colour
@@ -722,8 +643,8 @@ function glitchOnce() {
 }
 
 function startGlitch() {
-  glitchWords = [...document.querySelectorAll('.workshop .hz, .stack .hz')].filter(word =>
-    !word.matches(HAZE_WHOLE) && getComputedStyle(word).fontFamily.includes('Pressura'))
+  glitchWords = [...document.querySelectorAll('.glitch-word')].filter(word =>
+    getComputedStyle(word).fontFamily.includes('Pressura'))
   const [min, max] = GLITCH_EVERY_MS
   const next = () => setTimeout(() => {
     glitchOnce()

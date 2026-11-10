@@ -53,9 +53,9 @@ img {
   --gutter: 16px;
 
   /* Vertical rhythm */
-  --hero-top: 64px;       /* page top -> title */
+  --hero-top: 44px;       /* page top -> title */
   --hero-gap: 12px;       /* title -> workshop strip */
-  --content-top: 40px;    /* workshop strip -> content */
+  --content-top: 50px;    /* workshop strip -> content */
   --stack-gap: 80px;      /* auto layout gap between page sections and stickers */
 }
 
@@ -402,6 +402,132 @@ a,
   line-height: 21px;
 }
 
+/* What a poster and an olivier have in common: the [ title ], the dates, then centred
+   text. The header is the week sections' one */
+.olive {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Plain centred text, not a flex row: every word is its own span (the idle glitch), and
+   a flex row wouldn't wrap them, so on narrow screens the title wraps onto two lines */
+.olive .week__title {
+  display: block;
+  text-align: center;
+}
+
+/* 30/11 — 13/12 with a column of three stars at each end. Everything is set in Figma px
+   times --u, so the whole row shrinks together once the column gets narrower than 740px */
+.dates {
+  --u: min(1px, 100cqw / 740);
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: calc(10 * var(--u)) 0 calc(20 * var(--u));
+  text-transform: none;
+}
+
+.dates__day {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.dates__day:not(.dates__day--end) {
+  margin-right: calc(-60 * var(--u));
+}
+
+/* The numbers and the dash in Knorke, each box exactly as tall as the caps (0.752em),
+   like Figma's cap trim: a line height that puts the cap tops on the box's top edge and
+   the baseline on its bottom (worked out from the font's 0.768 ascent / 0.24 descent) */
+.dates__num,
+.dates__dash {
+  height: 0.752em;
+  font-family: var(--font-knorke);
+  font-weight: 400;
+  line-height: 0.976;
+  white-space: nowrap;
+}
+
+.dates__num {
+  margin-right: -0.047em;
+  font-size: calc(170 * var(--u));
+}
+
+.dates__day--end .dates__num {
+  margin-right: -0.029em;
+}
+
+/* /11, /12: sits on the number's baseline */
+.dates__month {
+  font-size: calc(23 * var(--u));
+  line-height: 0.826;
+  letter-spacing: -0.02em;
+}
+
+.dates__dash {
+  position: absolute;
+  left: calc(50% + 0.5 * var(--u));
+  top: calc(7 * var(--u));
+  transform: translateX(-50%);
+  font-size: calc(160 * var(--u));
+}
+
+/* Centred on the row's height */
+.dates__stars {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  width: calc(31.267 * var(--u));
+  height: calc(135 * var(--u));
+  max-width: none;
+}
+
+.dates__stars--end {
+  left: auto;
+  right: 0;
+}
+
+.olive__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.olive__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.olive__big {
+  font-size: 20px;
+  line-height: 20px;
+}
+
+/* 46px, unless the longest word («ингредиентами», 15 letters of 0.55em) would be wider
+   than the column: then just small enough to fit (phones) */
+.olive__about {
+  max-width: 654.207px;
+  font-size: min(46px, 100cqw / 8.4);
+  line-height: 0.87;
+}
+
+.olive__plus {
+  font-family: var(--font-alpha54);
+  font-size: 20px;
+  line-height: 20px;
+}
+
 .intro {
   display: flex;
   flex-direction: column;
@@ -553,6 +679,12 @@ a,
 .order--today-sale {
   --w: 304.888;
   --h: 166;
+}
+
+/* F-U-C-K U! on pink diamonds (Figma 470:985), right after the dates */
+.order--fuck-u {
+  --w: 189.855;
+  --h: 139.692;
 }
 
 .order--go {
@@ -1427,6 +1559,24 @@ a:focus-visible .swap__alt {
     margin-block: -0.66px -7px;
   }
 
+  /* Dates: no star columns, so the numbers grow to fill the row (the rest of it is 600px
+     wide in Figma): the row keeps its desktop proportions (740) with the empty star
+     margins hanging 70 off each side. The /11 and /12 stay readable */
+  .dates {
+    --u: min(1px, 100cqw / 600);
+    width: calc(740 * var(--u));
+    margin-inline: calc(-70 * var(--u));
+    align-self: center;
+  }
+
+  .dates__stars {
+    display: none;
+  }
+
+  .dates__month {
+    font-size: max(14px, calc(23 * var(--u)));
+  }
+
   /* Callout -> "экспериментируем с" */
   .intro {
     gap: 50px;
@@ -1715,36 +1865,6 @@ a:focus-visible .swap__alt {
   }
 }
 
-/* Haze (Figma "screen" 161:1086): text in the lower part of the screen is grey, in six
-   steps from mid grey at the bottom up to a dark grey just under the haze line; each
-   line turns black as it scrolls up past the line, and back again on the way down.
-   js/script.js wraps the words (.hz; words on one line change together), marks the =====
-   rules, buttons and black day blocks as lines of their own, and the +++ / ----- rows
-   drawn by ::before / ::after (.hz-before / .hz-after), and sets each line's opacity
-   (--hz / --hz-before / --hz-after; the greys are HAZE_GREYS there). Only with JS on
-   (.haze-on) */
-.haze-on {
-  --haze-ms: 450ms;
-}
-
-.haze-on .hz,
-.haze-on .hz-before::before,
-.haze-on .hz-after::after {
-  transition: opacity var(--haze-ms) ease;
-}
-
-.haze-on .hz { opacity: var(--hz, 0.4); }
-.haze-on .hz-before::before { opacity: var(--hz-before, 0.4); }
-.haze-on .hz-after::after { opacity: var(--hz-after, 0.4); }
-
-@media (prefers-reduced-motion: reduce) {
-  .haze-on .hz,
-  .haze-on .hz-before::before,
-  .haze-on .hz-after::after {
-    transition: none;
-  }
-}
-
 /* 4. Full-screen black ending: edge to edge, exactly one screen tall on every device */
 .blackout {
   width: 100%;
@@ -1806,6 +1926,7 @@ a:focus-visible .swap__alt {
    type themselves in, letter by letter in a loose, shuffled order (js/script.js splits
    the text into .type-char). .is-typing is set in the <head> */
 .is-typing .workshop,
+.is-typing .olive,
 .is-typing .intro {
   visibility: hidden;
 }
@@ -1826,6 +1947,7 @@ a:focus-visible .swap__alt {
 /* The = rules are drawn by CSS, so they type left to right in steps instead, starting
    80% drawn, like the letters that are already there */
 .is-typing-run .workshop .rule,
+.is-typing-run .olive .rule,
 .is-typing-run .intro .rule {
   animation: rule-type 0.3s steps(4) var(--delay, 0s) both;
 }
