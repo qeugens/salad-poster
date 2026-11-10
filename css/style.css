@@ -1555,6 +1555,11 @@ a:focus-visible .swap__alt {
     margin-block: -0.66px -7px;
   }
 
+  /* The split title starts against the [ like the week titles (centred only on desktop) */
+  .olive .week__title {
+    text-align: left;
+  }
+
   /* Dates: no star columns, so the numbers grow to fill the row (the rest of it is 600px
      wide in Figma): the row keeps its desktop proportions (740) with the empty star
      margins hanging 70 off each side. The /11 and /12 stay readable */

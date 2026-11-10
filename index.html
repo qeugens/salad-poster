@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Monofett&display=swap">
   <!-- ?v= changes with every update, so browsers fetch the new files instead of cached ones -->
   <link rel="stylesheet" href="css/fonts.css?v=20261110-1">
-  <link rel="stylesheet" href="css/style.css?v=20261111-2">
+  <link rel="stylesheet" href="css/style.css?v=20261111-4">
 </head>
 <body>
   <div class="status-tint" aria-hidden="true"></div>
@@ -98,10 +98,11 @@
       <div class="stack">
         <!-- What a poster and an olivier have in common + the dates (Figma 469:888) -->
         <section class="olive" aria-labelledby="olive-title">
-          <header class="week__head">
+          <!-- Desktop: one centred line. Phones: split like the week titles (Figma 476:1069) -->
+          <header class="week__head week__head--split">
             <span class="week__bracket" aria-hidden="true">[</span>
             <div class="week__heading">
-              <h2 class="week__title week__title--center" id="olive-title">Что общего у&nbsp;плаката и&nbsp;оливье?</h2>
+              <h2 class="week__title week__title--center" id="olive-title"><span>Что общего у&nbsp;плаката</span> <span>и&nbsp;оливье?</span></h2>
               <span class="rule" aria-hidden="true"></span>
             </div>
             <span class="week__bracket" aria-hidden="true">]</span>
