@@ -44,6 +44,8 @@ img {
   --spring-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
   --color-bg: #fafafa;
   --color-text: #1a1a1a;
+  /* Pure black for the phone's status bar and bottom bar (and the canvas around them) */
+  --color-bar: #000000;
   --color-orange: #ff9633;
   --color-pink: #f74980;
 
@@ -67,7 +69,7 @@ html {
 /* Black body (hidden under the page): newer iOS Safari takes the status bar colour from it */
 body {
   color: var(--color-text);
-  background: var(--color-text);
+  background: var(--color-bar);
 }
 
 body::before,
@@ -84,7 +86,7 @@ body::before {
   top: 0;
   bottom: 0;
   z-index: -1;
-  background-color: var(--color-text);
+  background-color: var(--color-bar);
 }
 
 /* Just above the top of the page, out of scroll reach: only the bounce past the top
@@ -93,7 +95,7 @@ body::after {
   position: absolute;
   bottom: 100%;
   height: 100vh;
-  background-color: var(--color-text);
+  background-color: var(--color-bar);
 }
 
 /* A black strip pinned to the top of the screen on iOS. Safari 26 ignores theme-color and
@@ -114,7 +116,7 @@ body::after {
     right: 0;
     height: 6px;
     z-index: 10000;
-    background: var(--color-text);
+    background: var(--color-bar);
     pointer-events: none;
   }
 
@@ -255,12 +257,6 @@ a,
   font-weight: 400;
 }
 
-.title__s { font-family: var(--font-alpha54); }
-.title__a { font-family: var(--font-brush-script); font-style: italic; }
-.title__l { font-family: var(--font-altenglisch); }
-.title__a-box { font-family: var(--font-monofett); }
-.title__d { font-family: var(--font-beroga); }
-
 /* Hover: the letter lifts a little and at once swaps to its look from the
    Figma components (s/a/l/a/d, Variant2): the letter tilted, in another font, with
    a thick colored outline. Angles and letter positions in index.html are taken
@@ -296,7 +292,7 @@ a,
 }
 
 /* Swapped in one go; the plain letter only goes transparent so it keeps the hover */
-.title__letter > text,
+.title__plain,
 .title__card {
   transition: opacity 0s var(--hold-ms), visibility 0s var(--hold-ms);
 }
@@ -314,7 +310,7 @@ a,
 .title__word:first-child { --side: calc(-1 * var(--lean)); }
 .title__word:last-child { --side: var(--lean); }
 
-.is-lit .title__letter > text,
+.is-lit .title__plain,
 .is-lit .title__card {
   transition-delay: var(--swap-delay);
 }
@@ -325,7 +321,7 @@ a,
   transition-delay: 0s;
 }
 
-.is-lit .title__letter > text { opacity: 0; }
+.is-lit .title__plain { opacity: 0; }
 
 .is-lit .title__card { visibility: visible; }
 
@@ -336,7 +332,7 @@ a,
     transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .title__letter:hover > text,
+  .title__letter:hover > .title__plain,
   .title__letter:hover .title__card {
     transition-delay: var(--swap-delay);
   }
@@ -346,7 +342,7 @@ a,
     transition-delay: 0s;
   }
 
-  .title__letter:hover > text { opacity: 0; }
+  .title__letter:hover > .title__plain { opacity: 0; }
 
   .title__letter:hover .title__card { visibility: visible; }
 }
@@ -1312,7 +1308,7 @@ a:focus-visible .swap__alt {
     translate: none;
   }
 
-  .title__letter:hover > text,
+  .title__letter:hover > .title__plain,
   .title__letter:hover .title__card {
     transition-delay: 0s;
   }
@@ -1534,7 +1530,7 @@ a:focus-visible .swap__alt {
   }
 
   /* 8px on screen, outside the letter (the SVG units are scaled down to ~0.56) */
-  .title__letter > text {
+  .title__plain {
     stroke: var(--color-bg);
     stroke-width: 28.66px;
     stroke-linejoin: round;
