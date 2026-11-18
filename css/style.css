@@ -752,7 +752,7 @@ a,
   grid-template-columns: minmax(min-content, max-content) minmax(min-content, 1fr);
 }
 
-.week__title span:last-child:not(:first-child) {
+.week__title > span:last-child:not(:first-child) {
   justify-self: end;
   text-align: right;
 }
@@ -855,7 +855,7 @@ a,
 }
 
 .wday__name,
-.wday__range span {
+.wday__range > span {
   display: block;
   width: var(--wday-block);
   height: calc(var(--wday-block) * 180 / 236);
@@ -875,14 +875,14 @@ a,
 }
 
 /* The single dash fits, so it centres by itself */
-.wday__range span:nth-child(2) {
+.wday__range > span:nth-child(2) {
   text-indent: 0;
 }
 
 /* Like Figma: trim the line to cap height, then centre it in the 180px box */
 @supports (text-box: trim-both cap alphabetic) {
   .wday__name,
-  .wday__range span {
+  .wday__range > span {
     padding-top: 5px;
     line-height: normal;
     text-box: trim-both cap alphabetic;
@@ -1682,11 +1682,11 @@ a:focus-visible .swap__alt {
     grid-area: 2 / 3 / 4 / 4;
   }
 
-  .week__title span:first-child {
+  .week__title > span:first-child {
     grid-area: 1 / 2 / 3 / 4;
   }
 
-  .week__title span:last-child {
+  .week__title > span:last-child {
     grid-area: 2 / 1 / 4 / 3;
     justify-self: end;
     max-width: 330px;
@@ -1699,7 +1699,7 @@ a:focus-visible .swap__alt {
   }
 
   .week__head--tall .week__bracket:last-child,
-  .week__head--tall .week__title span:last-child {
+  .week__head--tall .week__title > span:last-child {
     margin-top: 10px;
   }
 
@@ -1717,7 +1717,7 @@ a:focus-visible .swap__alt {
   /* Each day's letters start where Figma puts them (--m-x from the block's left edge),
      with its own tracking (--m-tracking), both set on the element in index.html */
   .wday__name,
-  .wday__range span {
+  .wday__range > span {
     width: 82px;
     height: auto;
     padding-right: 0;
@@ -1728,7 +1728,7 @@ a:focus-visible .swap__alt {
   }
 
   /* The dash sits centred */
-  .wday__range span:nth-child(2) {
+  .wday__range > span:nth-child(2) {
     text-align: center;
   }
 
@@ -1742,7 +1742,7 @@ a:focus-visible .swap__alt {
       padding-top: 4px;
     }
 
-    .wday__range span {
+    .wday__range > span {
       padding-top: 0;
     }
   }
@@ -1784,7 +1784,7 @@ a:focus-visible .swap__alt {
     padding: 4px 0;
   }
 
-  .wday__range span:nth-child(2) {
+  .wday__range > span:nth-child(2) {
     height: 69px;
   }
 
