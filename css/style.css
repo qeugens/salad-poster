@@ -1249,10 +1249,18 @@ a:focus-visible .swap__alt {
   height: 187px;
 }
 
-/* The poster sticks out of the bag's top, behind it. On hover it grows up and to the
-   left and spins half a turn onto its back face, which carries the same image, so it
-   lands the right way round. Timing from the Figma prototype (Smart Animate, Quick, 620ms). */
+/* The poster sticks out of the bag's top, behind it. On hover it comes out in two steps:
+   first it rises straight up at its small size until it's clear of the bag (--rise, in
+   --rise-ms, easing out), then it grows up and to the left and spins half a turn onto
+   its back face at the same time (it carries the same image, so it lands the right way
+   round), with the Figma prototype's timing (Smart Animate, Quick, 620ms). The rise is a
+   translate on top of the growing, so the open poster still ends exactly where it should.
+   Going back is the mirror: it shrinks and spins back first, then sinks into the bag
+   (--sink-delay later, easing in). */
 .bag__poster {
+  --rise: 120px;       /* its bottom edge 5px above the bag's top */
+  --rise-ms: 0.15s;
+  --sink-delay: 0.25s; /* by then it faces front again */
   position: absolute;
   top: 0;
   left: 2px;
@@ -1260,9 +1268,12 @@ a:focus-visible .swap__alt {
   height: 141px;
   transform-style: preserve-3d;
   transform: perspective(1200px) rotateY(0deg);
-  transition-property: top, left, width, height, transform;
-  transition-duration: 0.62s;
-  transition-timing-function: var(--poster-ease);
+  translate: 0 0;
+  transition-property: translate, top, left, width, height, transform;
+  transition-duration: var(--rise-ms), 0.62s, 0.62s, 0.62s, 0.62s, 0.62s;
+  /* going back: shrinking and spinning back at once, the sinking a moment later */
+  transition-timing-function: cubic-bezier(0.5, 0, 1, 1), var(--poster-ease), var(--poster-ease), var(--poster-ease), var(--poster-ease), var(--poster-ease);
+  transition-delay: var(--sink-delay), 0s, 0s, 0s, 0s, 0s;
 }
 
 .bag__poster-face {
@@ -1280,19 +1291,35 @@ a:focus-visible .swap__alt {
   transform: rotateY(180deg);
 }
 
+/* With a mouse only the bag opens it: the poster lets the cursor through, else a cursor
+   on the growing, flipping poster kept losing it mid-turn and the bag flickered shut
+   and open. Phones keep tapping the poster to put it back */
+@media (hover: hover) and (min-width: 771px) {
+  .bag__poster {
+    pointer-events: none;
+  }
+}
+
 .bag.is-open .bag__poster {
-  /* A bit bigger than in Figma (471 x 628), keeping the same bottom edge and centre */
-  top: -654px;
+  /* A bit bigger than in Figma (471 x 628), keeping the same bottom edge and centre;
+     the top makes up for the rise */
+  top: calc(-654px + var(--rise));
   left: -195.5px;
   width: 500px;
   height: 667px;
   transform: perspective(1200px) rotateY(180deg);
+  translate: 0 calc(-1 * var(--rise));
+  /* coming out: rising right away, growing and spinning once it's clear of the bag */
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1), var(--poster-ease), var(--poster-ease), var(--poster-ease), var(--poster-ease), var(--poster-ease);
+  transition-delay: 0s, var(--rise-ms), var(--rise-ms), var(--rise-ms), var(--rise-ms), var(--rise-ms);
 }
 
 /* No growing or flipping for people who turned animations off */
 @media (prefers-reduced-motion: reduce) {
-  .bag__poster {
+  .bag__poster,
+  .bag.is-open .bag__poster {
     transition-duration: 0.01s;
+    transition-delay: 0s;
   }
 
   .bag.is-open .bag__poster {
@@ -1432,7 +1459,9 @@ a:focus-visible .swap__alt {
     clip-path: inset(-100vh -100vw var(--bag-cut, -100vh) -100vw);
   }
 
+  /* The poster is taller here, so it rises further to clear the bag */
   .bag__poster {
+    --rise: 142px;
     left: 2.364px;
     width: 125.568px;
     height: 167.424px;
@@ -1470,7 +1499,7 @@ a:focus-visible .swap__alt {
   }
 
   .bag.is-open .bag__poster {
-    top: calc(0px - var(--poster-gap) - var(--poster-w) * 4 / 3);
+    top: calc(var(--rise) - var(--poster-gap) - var(--poster-w) * 4 / 3);
     left: calc((130px - var(--poster-w)) / 2);
     width: var(--poster-w);
     height: calc(var(--poster-w) * 4 / 3);

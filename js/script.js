@@ -59,7 +59,8 @@ if (bag && blackout) {
 }
 
 // The poster comes out of the bag (.is-open): on hover on desktop, on tap on phones.
-// On desktop a click on the bag or poster scrolls down to the buy section. On phones a
+// On desktop a click on the bag scrolls down to the buy section (the poster lets the mouse
+// through, see .bag__poster in the CSS). On phones a
 // tap only brings the poster out and the next tap hides it again. A tap anywhere else
 // or Escape puts the poster back.
 const buy = document.querySelector('.buy')
@@ -67,6 +68,34 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)')
 
 function openBag(isOpen) {
   bag.classList.toggle('is-open', isOpen)
+}
+
+// Hover animations always play to the end: a fast cursor going in and out over a trigger
+// used to cut them off midway, over and over, and they stuttered or froze. Now a trigger
+// remembers only where the cursor is now (want), and once the running animation has
+// finished it plays the next one towards that, if it's still needed.
+// settled(): resolves when the CSS transitions and animations playing in an element (and
+// inside it) are over; it waits two frames first, so ones that start next frame count.
+// Fun mode's colour flashes are plain animations, not CSS ones, so they don't hold it up
+function settled(element) {
+  return new Promise(frame => requestAnimationFrame(() => requestAnimationFrame(frame)))
+    .then(() => Promise.all(element.getAnimations({ subtree: true })
+      .filter(animation => animation instanceof CSSTransition || animation instanceof CSSAnimation)
+      .map(animation => animation.finished.catch(() => {}))))
+}
+
+// show(want) starts the animation towards want and resolves once it's over; shown() says
+// what's on screen now (which may also change by a click, Escape and so on)
+function hoverGate(show, shown) {
+  let want = null
+  let isBusy = false
+  return async next => {
+    want = next
+    if (isBusy) return
+    isBusy = true
+    while (want !== shown()) await show(want)
+    isBusy = false
+  }
 }
 
 // Our own smooth scroll: the browser's is slow over a long page and can't be sped up.
@@ -171,8 +200,12 @@ const isKeyPress = (event, code) => event.code === code && !event.repeat
   && !event.target.closest?.('input, textarea, select, [contenteditable]')
 
 if (bag) {
-  bag.addEventListener('mouseenter', () => !isPhone.matches && openBag(true))
-  bag.addEventListener('mouseleave', () => !isPhone.matches && openBag(false))
+  const hoverBag = hoverGate(isOpen => {
+    openBag(isOpen)
+    return settled(bag)
+  }, () => bag.classList.contains('is-open'))
+  bag.addEventListener('mouseenter', () => !isPhone.matches && hoverBag(true))
+  bag.addEventListener('mouseleave', () => !isPhone.matches && hoverBag(false))
 
   bag.addEventListener('click', () => {
     if (isPhone.matches) openBag(!bag.classList.contains('is-open'))
@@ -542,9 +575,24 @@ function endBurst() {
 
 const isBurstOn = () => burst?.classList.contains('is-on')
 
+// Hover: the pile always finishes flying out, and back in, before the next move; going
+// straight from one sticker to another, the pile goes back into the first, then out of
+// the next. burstFrom is the sticker the pile is out of (null while it's in)
+let burstFrom = null
+const hoverBurst = hoverGate(sticker => {
+  if (burstFrom) {
+    endBurst()
+    burstFrom = null
+  } else {
+    startBurst(sticker)
+    burstFrom = sticker
+  }
+  return settled(burst)
+}, () => (isBurstOn() ? burstFrom : (burstFrom = null)))
+
 burstTriggers.forEach(sticker => {
-  sticker.addEventListener('mouseenter', () => canHoverBurst.matches && startBurst(sticker))
-  sticker.addEventListener('mouseleave', () => canHoverBurst.matches && endBurst())
+  sticker.addEventListener('mouseenter', () => canHoverBurst.matches && hoverBurst(sticker))
+  sticker.addEventListener('mouseleave', () => canHoverBurst.matches && hoverBurst(null))
 })
 
 // Phones and tablets (no hover): a tap on a sticker bursts; while the pile is out, any
@@ -731,8 +779,8 @@ if (!reduceMotion.matches) {
 // the project colours, like the letters of the typing intro, for as long as it's on.
 // Each letter gets its own span; every FUN_EVERY_MS a share of the letters on screen
 // (FUN_SHARE) lights up in a random colour for FUN_TINT_MS. Off puts the text back.
-// The SALAD letters (SVG) and the = rules (CSS) keep their looks. With reduced motion
-// the letters take one colour each and stay that way
+// The SALAD letters (SVG outlines) flash too, by their fill; the = rules (CSS) keep their
+// look. With reduced motion the letters take one colour each and stay that way
 const FUN_SKIP = 'script, style, noscript, svg, .toast, .burst, .idle-stickers'
 const FUN_EVERY_MS = 50
 const FUN_SHARE = 0.04
@@ -742,6 +790,7 @@ let funRuns = []          // [the span the text went into, the original text]
 let funSeen = new Set()   // runs on screen
 let funObserver = null
 let funLoop = 0
+let funTitle = []         // the SALAD letters' outlines
 
 function startFun() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
@@ -773,7 +822,9 @@ function startFun() {
     funRuns.push([run, node])
     funObserver.observe(run)
   }
-  if (!reduceMotion.matches) funLoop = setInterval(funFlash, FUN_EVERY_MS)
+  funTitle = [...document.querySelectorAll('.title__plain')]
+  if (reduceMotion.matches) for (const letter of funTitle) letter.style.fill = pick(TYPE_COLORS)
+  else funLoop = setInterval(funFlash, FUN_EVERY_MS)
 }
 
 function funFlash() {
@@ -784,6 +835,13 @@ function funFlash() {
     const color = pick(TYPE_COLORS)
     pick(chars).animate([{ color }, { color }], { duration: FUN_TINT_MS, easing: 'steps(1)' })
   }
+  // each SALAD letter gets the same chance as a letter of the text, while the title shows
+  if (funTitle.length && funTitle[0].getBoundingClientRect().bottom < 0) return
+  for (const letter of funTitle) {
+    if (Math.random() >= FUN_SHARE) continue
+    const fill = pick(TYPE_COLORS)
+    letter.animate([{ fill }, { fill }], { duration: FUN_TINT_MS, easing: 'steps(1)' })
+  }
 }
 
 function stopFun() {
@@ -793,6 +851,11 @@ function stopFun() {
   funSeen = new Set()
   for (const [run, node] of funRuns) run.replaceWith(node)
   funRuns = []
+  for (const letter of funTitle) {
+    letter.style.fill = ''
+    for (const animation of letter.getAnimations()) animation.cancel()
+  }
+  funTitle = []
 }
 
 // The pill's key cap: F on a keyboard, ~ for a shake, 3x for three taps
