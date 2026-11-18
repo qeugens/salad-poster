@@ -101,6 +101,75 @@ function goToBuy() {
   requestAnimationFrame(step)
 }
 
+// Smooth wheel scroll (desktop, mouse or trackpad): a wheel turn moves a target, and the
+// page glides after it, covering WHEEL_GLIDE_MS-worth of the way each moment, so the
+// stops of a mouse wheel melt into one soft movement. Anything else that scrolls the page
+// (keys, the scrollbar, the bag's scroll down) takes over: the glide just lets go.
+// Phones keep their own touch scroll; zoom (ctrl + wheel) and sideways wheels pass by.
+const WHEEL_GLIDE_MS = 70
+const smoothWheel = matchMedia('(hover: hover) and (pointer: fine)')
+let wheelTarget = 0
+let wheelAt = -1     // where the glide has the page (exactly, unrounded); -1 while it isn't gliding
+let wheelLast = 0
+
+function wheelStep(now) {
+  if (wheelAt < 0) return
+  if (Math.abs(scrollY - wheelAt) > 2) {
+    wheelAt = -1  // someone else scrolled the page meanwhile
+    return
+  }
+  const dt = Math.max(0, Math.min(now - wheelLast, 50))
+  wheelLast = now
+  const left = wheelTarget - wheelAt
+  wheelAt = Math.abs(left) < 0.5 ? wheelTarget : wheelAt + left * (1 - Math.exp(-dt / WHEEL_GLIDE_MS))
+  scrollTo(0, wheelAt)
+  if (wheelAt === wheelTarget) wheelAt = -1
+  else requestAnimationFrame(wheelStep)
+}
+
+addEventListener('wheel', event => {
+  if (!smoothWheel.matches || reduceMotion.matches || event.ctrlKey) return
+  if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return
+  event.preventDefault()
+  const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1
+  const max = document.documentElement.scrollHeight - innerHeight
+  const from = wheelAt < 0 ? scrollY : wheelTarget
+  wheelTarget = Math.max(0, Math.min(max, from + event.deltaY * unit))
+  if (wheelAt < 0) {
+    wheelAt = scrollY
+    wheelLast = performance.now()
+    requestAnimationFrame(wheelStep)
+  }
+}, { passive: false })
+
+// The pill that says what got switched (F key, or a shake on phones), for TOAST_MS; made on the first press
+const TOAST_MS = 1400
+let toast = null
+let toastTimer = 0
+
+function showToast(key, label, isOn) {
+  if (!toast) {
+    toast = document.createElement('div')
+    toast.className = 'toast'
+    toast.setAttribute('role', 'status')
+    toast.innerHTML = '<span class="toast__key" aria-hidden="true"></span>'
+      + '<span class="toast__label"></span><span class="toast__dot" aria-hidden="true"></span>'
+    document.body.append(toast)
+    toast.offsetWidth  // its hidden look is drawn once, so the first pop animates too
+  }
+  toast.querySelector('.toast__key').textContent = key
+  toast.querySelector('.toast__label').textContent = `${label} ${isOn ? 'on' : 'off'}`
+  toast.classList.toggle('is-off', !isOn)
+  toast.classList.add('is-shown')
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => toast.classList.remove('is-shown'), TOAST_MS)
+}
+
+// A plain press of a letter key, not typed into a field (by the key's place, any layout)
+const isKeyPress = (event, code) => event.code === code && !event.repeat
+  && !event.ctrlKey && !event.metaKey && !event.altKey
+  && !event.target.closest?.('input, textarea, select, [contenteditable]')
+
 if (bag) {
   bag.addEventListener('mouseenter', () => !isPhone.matches && openBag(true))
   bag.addEventListener('mouseleave', () => !isPhone.matches && openBag(false))
@@ -352,15 +421,16 @@ const BURST_LAYOUTS = {
       ['mwah', 151.6, 348.1, 481, 360],
       ['hotdog', 684.1, 11.8, 268, 332],
       ['deal', 995.3, 129.1, 324, 208],
-      ['fukus', 488.6, 582.4, 265, 195],
+      ['fuck-u', 488.6, 582.4, 265, 195],
       ['sale', 984, 401.1, 307, 321],
       ['go', 850.1, 592.7, 319, 262],
     ],
-    // Order Now!!! or GO would show up twice (in the middle and in the pile), so their
-    // copy in the pile is swapped for Today Sale, centred on the copy's spot
+    // Order Now!!!, GO or FUCK U! would show up twice (in the middle and in the pile), so
+    // their copy in the pile is swapped for Today Sale, centred on the copy's spot
     standIns: {
       'order-now': [319.2, 227.4, 294, 156],
       go: [862.8, 645.7, 294, 156],
+      'fuck-u': [474.1, 601.9, 294, 156],
     },
   },
   // "iPhone 13 & 14 - 6" 426:1786, 390 x 844: nine of the same stickers, same sizes
@@ -617,7 +687,7 @@ const glitching = new Set()
 let glitchWords = []
 
 function glitchOnce() {
-  if (document.hidden || !glitchWords.length) return
+  if (document.hidden || !glitchWords.length || isFun) return
   for (let tries = 0; tries < 12; tries++) {
     const word = pick(glitchWords)
     if (glitching.has(word)) continue
@@ -655,6 +725,129 @@ function startGlitch() {
 
 if (!reduceMotion.matches) {
   document.fonts.ready.then(() => setTimeout(startGlitch, GLITCH_START_MS))
+}
+
+// Fun mode (F key, again to stop): every letter and symbol on the page keeps flashing in
+// the project colours, like the letters of the typing intro, for as long as it's on.
+// Each letter gets its own span; every FUN_EVERY_MS a share of the letters on screen
+// (FUN_SHARE) lights up in a random colour for FUN_TINT_MS. Off puts the text back.
+// The SALAD letters (SVG) and the = rules (CSS) keep their looks. With reduced motion
+// the letters take one colour each and stay that way
+const FUN_SKIP = 'script, style, noscript, svg, .toast, .burst, .idle-stickers'
+const FUN_EVERY_MS = 50
+const FUN_SHARE = 0.04
+const FUN_TINT_MS = 260
+let isFun = false
+let funRuns = []          // [the span the text went into, the original text]
+let funSeen = new Set()   // runs on screen
+let funObserver = null
+let funLoop = 0
+
+function startFun() {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: node => (node.parentElement.closest(FUN_SKIP) || !node.data.trim()
+      ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  })
+  const nodes = []
+  while (walker.nextNode()) nodes.push(walker.currentNode)
+  funObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) funSeen[entry.isIntersecting ? 'add' : 'delete'](entry.target)
+  })
+  for (const node of nodes) {
+    const run = document.createElement('span')
+    for (const part of node.data.split(/(\s+)/)) {
+      if (!part) continue
+      if (/^\s+$/.test(part)) {
+        run.append(part)
+        continue
+      }
+      for (const char of part) {
+        const span = document.createElement('span')
+        span.className = 'fun-char'
+        span.textContent = char
+        if (reduceMotion.matches) span.style.color = pick(TYPE_COLORS)
+        run.append(span)
+      }
+    }
+    node.replaceWith(run)
+    funRuns.push([run, node])
+    funObserver.observe(run)
+  }
+  if (!reduceMotion.matches) funLoop = setInterval(funFlash, FUN_EVERY_MS)
+}
+
+function funFlash() {
+  if (document.hidden) return
+  const chars = [...funSeen].flatMap(run => [...run.children])
+  const count = Math.ceil(chars.length * FUN_SHARE)
+  for (let i = 0; i < count; i++) {
+    const color = pick(TYPE_COLORS)
+    pick(chars).animate([{ color }, { color }], { duration: FUN_TINT_MS, easing: 'steps(1)' })
+  }
+}
+
+function stopFun() {
+  clearInterval(funLoop)
+  funObserver?.disconnect()
+  funObserver = null
+  funSeen = new Set()
+  for (const [run, node] of funRuns) run.replaceWith(node)
+  funRuns = []
+}
+
+// The pill's key cap: F on a keyboard, ~ for a shake
+function toggleFun(key) {
+  // not while the typing intro has the text in pieces
+  const root = document.documentElement.classList
+  if (root.contains('is-typing') || root.contains('is-typing-run')) return
+  isFun = !isFun
+  if (isFun) startFun()
+  else stopFun()
+  showToast(key, 'fun mode', isFun)
+}
+
+addEventListener('keydown', event => isKeyPress(event, 'KeyF') && toggleFun('F'))
+
+// Phones: a shake does the same. A shake is SHAKE_JOLTS hard jolts (over SHAKE_FORCE m/s²,
+// gravity left out) within SHAKE_WINDOW_MS; after one the phone rests for SHAKE_REST_MS,
+// so one long shake doesn't switch it on and off again. iPhones only share their motion
+// once the visitor allows it, and Safari asks only right after a tap, so the first tap
+// anywhere on the page brings up that question (once)
+const SHAKE_FORCE = 15
+const SHAKE_JOLTS = 3
+const SHAKE_WINDOW_MS = 1000
+const SHAKE_GAP_MS = 90     // readings closer than this are the same jolt
+const SHAKE_REST_MS = 1200
+const isTouchOnly = matchMedia('(hover: none) and (pointer: coarse)')
+let jolts = []
+let shakeRestUntil = 0
+
+function onMotion(event) {
+  const a = event.acceleration
+  let force
+  if (a && a.x !== null) force = Math.hypot(a.x, a.y, a.z)
+  else {
+    const g = event.accelerationIncludingGravity
+    if (!g || g.x === null) return
+    force = Math.abs(Math.hypot(g.x, g.y, g.z) - 9.81)
+  }
+  const now = performance.now()
+  if (force < SHAKE_FORCE || now < shakeRestUntil) return
+  if (jolts.length && now - jolts[jolts.length - 1] < SHAKE_GAP_MS) return
+  jolts = [...jolts.filter(at => now - at < SHAKE_WINDOW_MS), now]
+  if (jolts.length < SHAKE_JOLTS) return
+  jolts = []
+  shakeRestUntil = now + SHAKE_REST_MS
+  toggleFun('~')
+}
+
+if (isTouchOnly.matches && 'DeviceMotionEvent' in window) {
+  // phones that share motion freely (Android) send it right away; an iPhone sends nothing
+  // until it's allowed, and then the same listener picks it up
+  addEventListener('devicemotion', onMotion)
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    addEventListener('click', () => DeviceMotionEvent.requestPermission().catch(() => {}), { once: true })
+  }
 }
 
 // Idle stickers: after IDLE_AFTER_MS without any interaction, stickers start landing on

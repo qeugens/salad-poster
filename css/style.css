@@ -2012,3 +2012,65 @@ a:focus-visible .swap__alt {
     opacity: 0;
   }
 }
+
+/* Fun mode switch (F key, a shake on phones): a little pill pops up at the bottom centre
+   for a moment, saying what's on or off */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px 9px 9px;
+  border-radius: 999px;
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-family: var(--font-pressura-mono);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 15px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  translate: -50% 0;
+  opacity: 0;
+  scale: 0.6;
+  transition: opacity 0.15s, scale 0.15s ease-in;
+}
+
+.toast.is-shown {
+  opacity: 1;
+  scale: 1;
+  transition: opacity 0.12s, scale 0.35s var(--spring-ease);
+}
+
+.toast__key {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 7px;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.toast__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #00aa58;
+}
+
+.toast.is-off .toast__dot {
+  background: var(--color-pink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast.is-shown {
+    scale: 1;
+    transition: opacity 0.15s;
+  }
+}
