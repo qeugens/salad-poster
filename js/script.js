@@ -171,7 +171,7 @@ addEventListener('wheel', event => {
   }
 }, { passive: false })
 
-// The pill that says what got switched (F key; a shake or three taps on phones), for TOAST_MS; made on the first press
+// The pill that says what got switched (F key; three or more taps on phones), for TOAST_MS; made on the first press
 const TOAST_MS = 1400
 let toast = null
 let toastTimer = 0
@@ -775,6 +775,192 @@ if (!reduceMotion.matches) {
   document.fonts.ready.then(() => setTimeout(startGlitch, GLITCH_START_MS))
 }
 
+// Button hover (with a mouse): the label doesn't swap to its hover look at once.
+// Its letters scramble out instead, like the typing intro the other way round: each, at
+// its own random moment (within SWAP_SPREAD_MS), flickers through SWAP_FLIPS random
+// symbols in project colours, SWAP_STEP_MS each, and goes. Meanwhile the hover look comes
+// in piece by piece, mixed in with them: from SWAP_MIX_FROM of the way through, each
+// piece (a ❀, a ✰, the ✎ and each ﹏, a character of €(130)€) shows up at its own moment
+// in a project colour, then turns its own colour TYPE_TINT_MS later. €(130)€'s characters
+// also turn up among the flickering symbols. Leaving is the mirror: the pieces flash a
+// colour and go, while the letters type back in (symbols first, then the letter in a
+// colour for a moment, then the text colour). Every letter keeps its width, so nothing
+// moves. A new hover or leave takes over from where it is. Keyboard focus and phones
+// keep the plain swap (CSS); reduced motion swaps at once.
+// The glyphs are one drawing each, so they're cut into pieces by data-pieces on their
+// .swap__alt: where the glyphs sit across the drawing, in its own units (measured from
+// the gaps between them; the ﹏﹏﹏﹏ line is one stroke, cut in four)
+const SWAP_SPREAD_MS = 220
+const SWAP_STEP_MS = 55
+const SWAP_FLIPS = 2
+const SWAP_MIX_FROM = 0.45
+const SWAP_ALL_MS = SWAP_SPREAD_MS + SWAP_FLIPS * SWAP_STEP_MS
+const hasMouse = matchMedia('(hover: hover)')
+
+// A glyph drawing as clipped copies of itself, one per piece, stacked on the original
+// (which is the first piece); text as one span per character, marks kept on it
+function swapPieces(alt) {
+  const glyph = alt.querySelector('.swap__glyph')
+  if (glyph && alt.dataset.pieces) {
+    const cuts = alt.dataset.pieces.split(' ').map(Number)
+    const full = cuts[cuts.length - 1]
+    const clip = i => `inset(0 ${(100 * (full - cuts[i + 1]) / full).toFixed(3)}% 0 ${(100 * cuts[i] / full).toFixed(3)}%)`
+    const pieces = [glyph]
+    for (let i = 1; i < cuts.length - 1; i++) {
+      const copy = glyph.cloneNode(true)
+      copy.style.position = 'absolute'
+      copy.style.left = getComputedStyle(glyph).left
+      copy.style.clipPath = clip(i)
+      alt.append(copy)
+      pieces.push(copy)
+    }
+    glyph.style.clipPath = clip(0)
+    return pieces
+  }
+  const text = alt.textContent
+  alt.textContent = ''
+  return text.match(/\P{M}\p{M}*/gu).map(char => {
+    const span = document.createElement('span')
+    span.className = 'swap__piece'
+    span.textContent = char
+    alt.append(span)
+    return span
+  })
+}
+
+function setUpSwap(link) {
+  const swap = link.querySelector('.swap')
+  const label = swap?.querySelector('.swap__label')
+  const alt = swap?.querySelector('.swap__alt')
+  if (!label || !alt) return
+  const text = label.textContent
+  label.textContent = ''
+  const chars = []
+  for (const char of text) {
+    if (/\s/.test(char)) {
+      label.append(char)
+      continue
+    }
+    const span = document.createElement('span')
+    span.className = 'swap__char'
+    span.textContent = char
+    label.append(span)
+    chars.push([span, char])
+  }
+  // the hover look's own characters (€(130)€) join the flickering symbols
+  const altChars = alt.querySelector('.swap__glyph') ? [] : [...new Set(alt.textContent.match(/\P{M}/gu))]
+  // made at the first hover: the glyphs are drawn inline by then (inlineSvg)
+  let pieces = null
+  const tint = (piece, color) => {
+    if (piece.matches('span')) piece.style.color = color
+    else piece.querySelectorAll('path').forEach(path => (path.style.fill = color))
+  }
+
+  let timers = []
+  const later = (ms, fn) => timers.push(setTimeout(fn, ms))
+  const resetLabel = () => {
+    for (const [span, char] of chars) {
+      span.textContent = char
+      span.style.color = ''
+      span.style.visibility = ''
+      span.style.width = ''
+    }
+  }
+  const resetPieces = () => {
+    for (const piece of pieces) {
+      piece.style.visibility = ''
+      tint(piece, '')
+    }
+  }
+  const reset = () => {
+    timers.forEach(clearTimeout)
+    timers = []
+    swap.classList.remove('is-mixing')
+    resetLabel()
+    resetPieces()
+  }
+  // each letter keeps its width while it plays (measured now: the size can change with
+  // the window), so a symbol in its place moves nothing
+  const holdWidths = () => {
+    const widths = chars.map(([span]) => span.getBoundingClientRect().width)
+    chars.forEach(([span], i) => (span.style.width = `${widths[i]}px`))
+  }
+  // later on, the hover look's characters turn up more often among the symbols
+  const symbolAt = ms => (altChars.length && Math.random() < ms / SWAP_ALL_MS ? pick(altChars) : pick(GLITCH_SYMBOLS))
+  const flicker = (span, start, withAlt) => {
+    for (let flip = 0; flip < SWAP_FLIPS; flip++) {
+      const at = start + flip * SWAP_STEP_MS
+      later(at, () => {
+        span.style.visibility = ''
+        span.textContent = withAlt ? symbolAt(at) : pick(GLITCH_SYMBOLS)
+        span.style.color = pick(TYPE_COLORS)
+      })
+    }
+  }
+
+  link.addEventListener('mouseenter', () => {
+    if (!hasMouse.matches) return
+    pieces ??= swapPieces(alt)
+    reset()
+    if (reduceMotion.matches) return swap.classList.add('is-alt')
+    holdWidths()
+    let last = 0
+    for (const [span] of chars) {
+      const start = Math.random() * SWAP_SPREAD_MS
+      flicker(span, start, true)
+      const gone = start + SWAP_FLIPS * SWAP_STEP_MS
+      later(gone, () => (span.style.visibility = 'hidden'))
+      last = Math.max(last, gone)
+    }
+    // the hover look's pieces come in during the second half, each in a colour first
+    swap.classList.add('is-mixing')
+    for (const piece of pieces) {
+      piece.style.visibility = 'hidden'
+      const start = SWAP_ALL_MS * (SWAP_MIX_FROM + Math.random() * (1 - SWAP_MIX_FROM))
+      later(start, () => {
+        piece.style.visibility = ''
+        tint(piece, pick(TYPE_COLORS))
+      })
+      later(start + TYPE_TINT_MS, () => tint(piece, ''))
+    }
+    later(last, () => {
+      swap.classList.add('is-alt')
+      swap.classList.remove('is-mixing')
+      resetLabel()
+    })
+  })
+
+  link.addEventListener('mouseleave', () => {
+    if (!hasMouse.matches) return
+    pieces ??= swapPieces(alt)
+    reset()
+    swap.classList.remove('is-alt')
+    if (reduceMotion.matches) return
+    holdWidths()
+    // the pieces flash a colour and go in the first half
+    swap.classList.add('is-mixing')
+    for (const piece of pieces) {
+      const start = Math.random() * SWAP_ALL_MS * (1 - SWAP_MIX_FROM)
+      later(start, () => tint(piece, pick(TYPE_COLORS)))
+      later(start + SWAP_STEP_MS, () => (piece.style.visibility = 'hidden'))
+    }
+    for (const [span, char] of chars) {
+      const start = Math.random() * SWAP_SPREAD_MS
+      span.style.visibility = 'hidden'
+      flicker(span, start, false)
+      const landed = start + SWAP_FLIPS * SWAP_STEP_MS
+      later(landed, () => {
+        span.textContent = char
+        span.style.color = pick(TYPE_COLORS)
+      })
+      later(landed + TYPE_TINT_MS, () => (span.style.color = ''))
+    }
+    later(SWAP_ALL_MS + TYPE_TINT_MS, reset)
+  })
+}
+
+document.querySelectorAll('.crew__link, .buy__link, .ask').forEach(setUpSwap)
+
 // Fun mode (F key, again to stop): every letter and symbol on the page keeps flashing in
 // the project colours, like the letters of the typing intro, for as long as it's on.
 // Each letter gets its own span; every FUN_EVERY_MS a share of the letters on screen
@@ -858,7 +1044,7 @@ function stopFun() {
   funTitle = []
 }
 
-// The pill's key cap: F on a keyboard, ~ for a shake, 3x for three taps
+// The pill's key cap: F on a keyboard, 3x for taps
 function toggleFun(key) {
   // not while the typing intro has the text in pieces
   const root = document.documentElement.classList
@@ -871,51 +1057,12 @@ function toggleFun(key) {
 
 addEventListener('keydown', event => isKeyPress(event, 'KeyF') && toggleFun('F'))
 
-// Phones: a shake does the same. A shake is SHAKE_JOLTS hard jolts (over SHAKE_FORCE m/s²,
-// gravity left out) within SHAKE_WINDOW_MS; after one the phone rests for SHAKE_REST_MS,
-// so one long shake doesn't switch it on and off again. iPhones only share their motion
-// once the visitor allows it, and Safari asks only right after a tap, so the first tap
-// anywhere on the page brings up that question (once)
-const SHAKE_FORCE = 15
-const SHAKE_JOLTS = 3
-const SHAKE_WINDOW_MS = 1000
-const SHAKE_GAP_MS = 90     // readings closer than this are the same jolt
-const SHAKE_REST_MS = 1200
-const isTouchOnly = matchMedia('(hover: none) and (pointer: coarse)')
-let jolts = []
-let shakeRestUntil = 0
-
-function onMotion(event) {
-  const a = event.acceleration
-  let force
-  if (a && a.x !== null) force = Math.hypot(a.x, a.y, a.z)
-  else {
-    const g = event.accelerationIncludingGravity
-    if (!g || g.x === null) return
-    force = Math.abs(Math.hypot(g.x, g.y, g.z) - 9.81)
-  }
-  const now = performance.now()
-  if (force < SHAKE_FORCE || now < shakeRestUntil) return
-  if (jolts.length && now - jolts[jolts.length - 1] < SHAKE_GAP_MS) return
-  jolts = [...jolts.filter(at => now - at < SHAKE_WINDOW_MS), now]
-  if (jolts.length < SHAKE_JOLTS) return
-  jolts = []
-  shakeRestUntil = now + SHAKE_REST_MS
-  toggleFun('~')
-}
-
-if (isTouchOnly.matches && 'DeviceMotionEvent' in window) {
-  // phones that share motion freely (Android) send it right away; an iPhone sends nothing
-  // until it's allowed, and then the same listener picks it up
-  addEventListener('devicemotion', onMotion)
-  if (typeof DeviceMotionEvent.requestPermission === 'function') {
-    addEventListener('click', () => DeviceMotionEvent.requestPermission().catch(() => {}), { once: true })
-  }
-}
-
-// Phones: three quick taps anywhere do the same (each within TAP_GAP_MS of the last).
-// A tap that scrolls isn't a click, so it doesn't count
+// Phones: three or more quick taps anywhere do the same (each within TAP_GAP_MS of the
+// last). It switches on the third tap; more taps in the same run don't switch it back,
+// so a run of any length (3, 5, 10 taps) switches it once. A tap that scrolls isn't a
+// click, so it doesn't count
 const TAP_GAP_MS = 400
+const isTouchOnly = matchMedia('(hover: none) and (pointer: coarse)')
 let taps = 0
 let lastTap = 0
 
@@ -924,9 +1071,7 @@ addEventListener('click', () => {
   const now = performance.now()
   taps = now - lastTap < TAP_GAP_MS ? taps + 1 : 1
   lastTap = now
-  if (taps < 3) return
-  taps = 0
-  toggleFun('3x')
+  if (taps === 3) toggleFun('3x')
 })
 
 // Idle stickers: after IDLE_AFTER_MS without any interaction, stickers start landing on

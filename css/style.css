@@ -1163,7 +1163,8 @@ a,
 
 /* Buttons swap their text (Figma hover state): >инстик< to ❀❀❀ / ✰✰✰, >купить< to the
    €(130)€ tag, >задать вопрос< to ✎﹏﹏﹏﹏. Both texts sit in the same grid
-   cell, so the button keeps its size. With a mouse: on hover. With a keyboard: on focus.
+   cell, so the button keeps its size. With a mouse: on hover, the letters scrambling out
+   first (see .is-alt below). With a keyboard: on focus.
    On phones (no hover): while the button has focus or is pressed */
 .swap {
   display: inline-grid;
@@ -1215,14 +1216,26 @@ a:focus-visible .swap__alt {
   visibility: visible;
 }
 
-@media (hover: hover) {
-  a:hover .swap__label {
-    visibility: hidden;
-  }
+/* With a mouse the swap is played by js/script.js: the label's letters scramble out
+   (.swap__char), then .is-alt shows the hover look; leaving, they type back in */
+.swap.is-alt .swap__label {
+  visibility: hidden;
+}
 
-  a:hover .swap__alt {
-    visibility: visible;
-  }
+.swap.is-alt .swap__alt,
+.swap.is-mixing .swap__alt {
+  visibility: visible;
+}
+
+/* the hover glyph's pieces (copies of the drawing, each clipped to one glyph) stack on
+   the original */
+.swap__alt {
+  position: relative;
+}
+
+.swap__char {
+  display: inline-block;
+  text-align: center;
 }
 
 @media (hover: none) {
@@ -2047,7 +2060,7 @@ a:focus-visible .swap__alt {
   }
 }
 
-/* Fun mode switch (F key; a shake or three taps on phones): a little pill pops up at the bottom centre
+/* Fun mode switch (F key; three or more taps on phones): a little pill pops up at the bottom centre
    for a moment, saying what's on or off */
 .toast {
   position: fixed;
