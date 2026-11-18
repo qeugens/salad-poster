@@ -142,7 +142,7 @@ addEventListener('wheel', event => {
   }
 }, { passive: false })
 
-// The pill that says what got switched (F key, or a shake on phones), for TOAST_MS; made on the first press
+// The pill that says what got switched (F key; a shake or three taps on phones), for TOAST_MS; made on the first press
 const TOAST_MS = 1400
 let toast = null
 let toastTimer = 0
@@ -795,7 +795,7 @@ function stopFun() {
   funRuns = []
 }
 
-// The pill's key cap: F on a keyboard, ~ for a shake
+// The pill's key cap: F on a keyboard, ~ for a shake, 3x for three taps
 function toggleFun(key) {
   // not while the typing intro has the text in pieces
   const root = document.documentElement.classList
@@ -849,6 +849,22 @@ if (isTouchOnly.matches && 'DeviceMotionEvent' in window) {
     addEventListener('click', () => DeviceMotionEvent.requestPermission().catch(() => {}), { once: true })
   }
 }
+
+// Phones: three quick taps anywhere do the same (each within TAP_GAP_MS of the last).
+// A tap that scrolls isn't a click, so it doesn't count
+const TAP_GAP_MS = 400
+let taps = 0
+let lastTap = 0
+
+addEventListener('click', () => {
+  if (!isTouchOnly.matches) return
+  const now = performance.now()
+  taps = now - lastTap < TAP_GAP_MS ? taps + 1 : 1
+  lastTap = now
+  if (taps < 3) return
+  taps = 0
+  toggleFun('3x')
+})
 
 // Idle stickers: after IDLE_AFTER_MS without any interaction, stickers start landing on
 // the screen one after another, at random spots and tilts, piling over each other, for

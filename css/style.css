@@ -5,6 +5,11 @@
   box-sizing: border-box;
 }
 
+/* No double-tap zoom on phones (pinch zoom stays): three quick taps switch fun mode */
+html {
+  touch-action: manipulation;
+}
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -2013,7 +2018,7 @@ a:focus-visible .swap__alt {
   }
 }
 
-/* Fun mode switch (F key, a shake on phones): a little pill pops up at the bottom centre
+/* Fun mode switch (F key; a shake or three taps on phones): a little pill pops up at the bottom centre
    for a moment, saying what's on or off */
 .toast {
   position: fixed;
