@@ -1406,12 +1406,12 @@ a:focus-visible .swap__alt {
 }
 
 .bag.is-open .bag__poster {
-  /* A bit bigger than in Figma (471 x 628), keeping the same bottom edge and centre;
+  /* A bit smaller than in Figma (471 x 628), keeping the same bottom edge and centre;
      the top makes up for the rise */
-  top: calc(-654px + var(--rise));
-  left: -195.5px;
-  width: 500px;
-  height: 667px;
+  top: calc(-574px + var(--rise));
+  left: -165.5px;
+  width: 440px;
+  height: 587px;
   transform: perspective(1200px) rotateY(180deg);
   translate: 0 calc(-1 * var(--rise));
   /* coming out: rising right away, growing and spinning once it's clear of the bag */
