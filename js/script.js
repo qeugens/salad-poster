@@ -23,7 +23,55 @@ if (statusTint && page) {
   }, STATUS_TINT_READ_MS))
 }
 
-// Shopping bag: fixed 24px above the bottom of the screen, but it never goes onto the
+// The part of the screen that's really seen. Embedded in another site (an iframe under its
+// menu, 100vh tall but starting lower down, or taller than a phone screen with its bars
+// out), the bottom of this page's screen can be off the real screen, and with it
+// everything pinned there. An IntersectionObserver in an iframe measures against the real
+// screen, so a stack of thin bands over the whole screen tells how much is cut off at the
+// top and the bottom (only the bands at the edges change, so any scroll of the outer page
+// shows up, within half a pixel). It goes into --seen-top / --seen-bottom for the CSS, and
+// a 'seenchange' event; on its own (not embedded) both stay 0
+const seen = { top: 0, bottom: 0 }
+{
+  const BANDS = 20
+  const STEPS = 100
+  const probe = document.createElement('div')
+  probe.className = 'seen-probe'
+  probe.setAttribute('aria-hidden', 'true')
+  const rects = new Map()
+  const observer = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      rects.set(entry.target, entry.isIntersecting ? entry.intersectionRect : null)
+    }
+    let top = Infinity
+    let bottom = -Infinity
+    for (const rect of rects.values()) {
+      if (!rect || !rect.height) continue
+      top = Math.min(top, rect.top)
+      bottom = Math.max(bottom, rect.bottom)
+    }
+    if (top === Infinity) return  // all off screen: keep the last
+    const next = {
+      top: Math.max(0, Math.round(top)),
+      bottom: Math.max(0, Math.round(innerHeight - bottom)),
+    }
+    if (next.top === seen.top && next.bottom === seen.bottom) return
+    Object.assign(seen, next)
+    document.documentElement.style.setProperty('--seen-top', `${seen.top}px`)
+    document.documentElement.style.setProperty('--seen-bottom', `${seen.bottom}px`)
+    dispatchEvent(new Event('seenchange'))
+  }, { threshold: Array.from({ length: STEPS + 1 }, (_, i) => i / STEPS) })
+  for (let i = 0; i < BANDS; i++) {
+    const band = document.createElement('div')
+    band.style.top = `${(i / BANDS) * 100}%`
+    band.style.height = `${100 / BANDS}%`
+    probe.append(band)
+    observer.observe(band)
+  }
+  document.body.append(probe)
+}
+
+// Shopping bag: fixed 24px above the bottom of the (seen) screen, but it never goes onto the
 // black ending. Once the black section comes close, the bag stops 100px above it
 // and scrolls away with the page. On phones it stays put and the black ending slides
 // over it instead: everything below the black section's top edge is cut away.
@@ -42,19 +90,20 @@ function placeBag() {
     // From the bag's bottom edge; unclipped while the black is below it
     const cut = bag.getBoundingClientRect().bottom - blackTop
     bag.style.setProperty('--bag-cut', cut > 0 ? `${cut}px` : '')
-    if (blackTop < window.innerHeight) openBag(false)  // the poster goes back once the black shows
+    if (blackTop < innerHeight - seen.bottom) openBag(false)  // the poster goes back once the black shows
     return
   }
 
   bag.style.removeProperty('--bag-cut')
   const overlap = window.innerHeight - blackTop
-  bag.style.bottom = `${Math.max(BAG_SCREEN_GAP, overlap + BAG_BLACK_GAP)}px`
+  bag.style.bottom = `${Math.max(BAG_SCREEN_GAP + seen.bottom, overlap + BAG_BLACK_GAP)}px`
 }
 
 if (bag && blackout) {
   placeBag()
   window.addEventListener('scroll', placeBag, { passive: true })
   window.addEventListener('resize', placeBag)
+  window.addEventListener('seenchange', placeBag)
   isPhone.addEventListener('change', placeBag)
 }
 
@@ -513,7 +562,7 @@ function buildBurst() {
     const item = document.createElement('div')
     item.className = 'burst__item'
     item.style.left = `${(x / layout.width) * 100}vw`
-    item.style.top = `${((y - layout.top) / layout.height) * 100}vh`
+    item.style.top = `${((y - layout.top) / layout.height) * 100}%`  // of the seen screen
     item.style.width = `${(w / layout.width) * 100}vw`
     item.style.aspectRatio = `${w} / ${h}`
     item.style.setProperty('--i', index)
@@ -544,8 +593,9 @@ function startBurst(sticker) {
   buildBurst()
   clearTimeout(burstBackTimer)
   const from = sticker.getBoundingClientRect()
-  const cx = from.left + from.width / 2
-  const cy = from.top + from.height / 2
+  const layer = burst.getBoundingClientRect()  // starts at the top of the seen screen
+  const cx = from.left + from.width / 2 - layer.left
+  const cy = from.top + from.height / 2 - layer.top
   // order--order-now -> 'order-now'; Today Sale has no copy in the pile
   const picked = [...sticker.classList].find(name => name.startsWith('order--'))?.slice(7)
   for (const item of burst.children) {

@@ -1348,7 +1348,7 @@ a:focus-visible .swap__alt {
 
   position: fixed;
   left: calc(var(--margin) + 9 * (var(--column) + var(--gutter)));
-  bottom: 24px;
+  bottom: calc(24px + var(--seen-bottom, 0px));  /* js/script.js keeps it off the black */
   z-index: 10;
   width: 149px;
   height: 187px;
@@ -1555,10 +1555,10 @@ a:focus-visible .swap__alt {
     --poster-gap: 27px;     /* open poster's bottom edge -> the bag's top */
     /* Open poster width; on short screens no taller than fits above the bag up to 8px
        below the top of the screen */
-    --poster-w: min(100vw - 2 * var(--margin), (100dvh - var(--bag-peek) - var(--poster-gap) - 8px) * 0.75);
+    --poster-w: min(100vw - 2 * var(--margin), (100dvh - var(--seen-top, 0px) - var(--seen-bottom, 0px) - var(--bag-peek) - var(--poster-gap) - 8px) * 0.75);
 
     left: calc(50% - 130px / 2);
-    bottom: calc(var(--bag-peek) - 221px);
+    bottom: calc(var(--bag-peek) - 221px + var(--seen-bottom, 0px));
     width: 130px;
     height: 221px;
     clip-path: inset(-100vh -100vw var(--bag-cut, -100vh) -100vw);
@@ -2021,7 +2021,7 @@ a:focus-visible .swap__alt {
    lands in the sticker. The hovered sticker stays on top of the pile */
 .burst {
   position: fixed;
-  inset: 0;
+  inset: var(--seen-top, 0px) 0 var(--seen-bottom, 0px);
   z-index: 20;
   pointer-events: none;
 }
@@ -2108,7 +2108,7 @@ a:focus-visible .swap__alt {
    with its own delay, time and spin (--fall-delay / --fall-ms / --fall-turn) */
 .idle-stickers {
   position: fixed;
-  inset: 0;
+  inset: var(--seen-top, 0px) 0 var(--seen-bottom, 0px);
   z-index: 19;
   overflow: hidden;
   pointer-events: none;
@@ -2157,7 +2157,7 @@ a:focus-visible .swap__alt {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 24px;
+  bottom: calc(24px + var(--seen-bottom, 0px));
   z-index: 30;
   display: flex;
   align-items: center;
@@ -2212,4 +2212,22 @@ a:focus-visible .swap__alt {
     scale: 1;
     transition: opacity 0.15s;
   }
+}
+
+/* Measures how much of the screen is really seen when the page is embedded in another
+   site (js/script.js, --seen-top / --seen-bottom): invisible bands over the whole screen.
+   Everything pinned to an edge of the screen (the bag, the toast, the stickers) keeps to
+   the seen part */
+.seen-probe {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.seen-probe > div {
+  position: absolute;
+  left: 0;
+  right: 0;
 }
