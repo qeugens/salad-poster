@@ -159,21 +159,114 @@ body::after {
   }
 }
 
-/* Custom cursors (retro 3D hands, taken from akademijaoxford.com): a tilted hand
-   everywhere, an upright one over anything clickable. The .cur files carry their own
-   hotspot; the PNG copies (for Safari) name it: the fingertip in the 32x32 image. */
+/* Cursors, each trimmed from its original image, with a sharp 2x copy for retina
+   screens (browsers drop cursors over 128px; a 2x copy counts at half its size, so
+   both are as big as that allows):
+   - everywhere: a hand holding a fan of dollar bills (money-hand.png, 65 x 128),
+     clicking with the top corner of the bills (43, 0)
+   - over links and buttons (the bag too): a hand reaching down to grab (reach-hand.png,
+     128 x 75), clicking with the middle fingertip (66, 34)
+   - over the burst stickers: a hand pointing up (poke-hand.png, 58 x 128), clicking
+     with the fingertip (9, 1)
+   The plain url() is for browsers without image-set(); Safari reads the -webkit- one */
 :root {
-  --cursor-normal: url("../assets/cursors/normal.cur"), url("../assets/cursors/normal.png") 0 0, auto;
-  --cursor-link: url("../assets/cursors/hyperlink.cur"), url("../assets/cursors/hyperlink.png") 13 0, pointer;
+  --cursor-1x: url("../assets/cursors/money-hand.png?v=20261119-2");
+  --cursor-2x: url("../assets/cursors/money-hand@2x.png?v=20261119-2");
+  --pointer-1x: url("../assets/cursors/reach-hand.png?v=20261119-1");
+  --pointer-2x: url("../assets/cursors/reach-hand@2x.png?v=20261119-1");
+  --poke-1x: url("../assets/cursors/poke-hand.png?v=20261119-2");
+  --poke-2x: url("../assets/cursors/poke-hand@2x.png?v=20261119-2");
 }
 
-html {
-  cursor: var(--cursor-normal);
+html,
+.title__letter {
+  cursor: var(--cursor-1x) 43 0, auto;
+  cursor: -webkit-image-set(var(--cursor-1x) 1x, var(--cursor-2x) 2x) 43 0, auto;
+  cursor: image-set(var(--cursor-1x) 1x, var(--cursor-2x) 2x) 43 0, auto;
 }
 
 a,
+button,
 [role="button"] {
-  cursor: var(--cursor-link);
+  cursor: var(--pointer-1x) 66 34, pointer;
+  cursor: -webkit-image-set(var(--pointer-1x) 1x, var(--pointer-2x) 2x) 66 34, pointer;
+  cursor: image-set(var(--pointer-1x) 1x, var(--pointer-2x) 2x) 66 34, pointer;
+}
+
+@media (hover: hover) and (min-width: 771px) {
+  .order {
+    cursor: var(--poke-1x) 9 1, pointer;
+    cursor: -webkit-image-set(var(--poke-1x) 1x, var(--poke-2x) 2x) 9 1, pointer;
+    cursor: image-set(var(--poke-1x) 1x, var(--poke-2x) 2x) 9 1, pointer;
+  }
+}
+
+/* With a mouse, js/script.js hides the real cursor (has-hand-cursor) and draws the hand
+   itself, following the mouse, a touch bigger than browsers allow a real cursor to be. Its click
+   point stays the mouse's point; the whole picture counts for hovering, and over
+   anything clickable (is-grabbing) the reaching hand shows instead, and over the burst
+   stickers (is-poking) the pointing finger. The real cursors
+   above stay for phones, keyboards and when the script hasn't run */
+html.has-hand-cursor,
+html.has-hand-cursor * {
+  cursor: none;
+}
+
+.hand-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483647;
+  pointer-events: none;
+}
+
+.hand-cursor[hidden] {
+  display: none;
+}
+
+.hand-cursor__hand {
+  position: absolute;
+  display: none;
+  background: var(--hand-1x) 0 0 / 100% 100% no-repeat;
+  background: -webkit-image-set(var(--hand-1x) 1x, var(--hand-2x) 2x) 0 0 / 100% 100% no-repeat;
+  background: image-set(var(--hand-1x) 1x, var(--hand-2x) 2x) 0 0 / 100% 100% no-repeat;
+}
+
+/* money hand: 65 x 128 clicking at (43, 0), times 1.06 */
+.hand-cursor__hand--money {
+  --hand-1x: var(--cursor-1x);
+  --hand-2x: var(--cursor-2x);
+  top: 0;
+  left: -46px;
+  width: 69px;
+  height: 136px;
+}
+
+/* reaching hand: 128 x 75 clicking at (66, 34), times 0.85, so it's a bit smaller than
+   the money hand (its longest side 109 against the money hand's 136) */
+.hand-cursor__hand--reach {
+  --hand-1x: var(--pointer-1x);
+  --hand-2x: var(--pointer-2x);
+  top: -29px;
+  left: -56px;
+  width: 109px;
+  height: 64px;
+}
+
+/* pointing finger: 58 x 128 clicking at (9, 1), times 0.85 */
+.hand-cursor__hand--poke {
+  --hand-1x: var(--poke-1x);
+  --hand-2x: var(--poke-2x);
+  top: -1px;
+  left: -8px;
+  width: 49px;
+  height: 109px;
+}
+
+html:not(.is-grabbing):not(.is-poking) .hand-cursor__hand--money,
+html.is-grabbing:not(.is-poking) .hand-cursor__hand--reach,
+html.is-poking .hand-cursor__hand--poke {
+  display: block;
 }
 
 /* Nothing pokes out sideways into a horizontal scroll (on phones the big ORDER ellipse
@@ -269,7 +362,6 @@ a,
    the letter sinks back the same way. */
 .title__letter {
   pointer-events: visiblePainted;
-  cursor: default;
   /* Mirrors the way up: starts sinking just before the card goes away, so it swaps back halfway down */
   transition: translate var(--lift-ms) cubic-bezier(0.3, 0, 0.3, 1) calc(var(--hold-ms) - var(--swap-delay));
 }

@@ -1147,3 +1147,144 @@ for (const type of ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstar
   addEventListener(type, wake, { passive: true })
 }
 wake()
+
+// Whole-hand hover: a browser only checks the cursor's single click point, so here the
+// whole cursor picture counts instead. With a mouse, every move (and scroll) checks which
+// links, buttons, the bag and the burst stickers the picture overlaps, sends those the
+// usual mouseenter / mouseleave (the browser's own, from the click point, are dropped),
+// and switches the cursor to the reaching hand over anything clickable (the pointing
+// finger over the burst stickers). A click that
+// lands next to a link but still under the hand clicks that link.
+// The cursor itself is drawn here too (.hand-cursor), the money hand a touch bigger
+// than browsers allow a real cursor to be. The areas are the drawn hands' boxes around the
+// click point (see css/style.css): the money hand is 69 x 136 clicking at (46, 0), the
+// reaching hand 109 x 64 at (56, 29), the pointing finger 49 x 109 at (8, 1).
+// While the reaching hand or the finger is shown, either box keeps a hover, so swapping between the
+// two pictures can't make it flicker on and off
+{
+  const HAND_AREA = { left: -46, top: 0, width: 69, height: 136 }
+  const GRAB_AREA = { left: -56, top: -29, width: 109, height: 64 }
+  const POKE_AREA = { left: -8, top: -1, width: 49, height: 109 }
+  const TARGETS = 'a, button, [role="button"], .order'
+  const CLICKABLE = 'a, button, [role="button"]'
+  const hasFineMouse = matchMedia('(hover: hover) and (pointer: fine)')
+  const root = document.documentElement
+  let hovered = new Map() // element -> how much of it the picture covers
+  let isOn = false
+  let last = null
+
+  const drawn = document.createElement('div')
+  drawn.className = 'hand-cursor'
+  drawn.hidden = true
+  drawn.setAttribute('aria-hidden', 'true')
+  drawn.innerHTML = '<div class="hand-cursor__hand hand-cursor__hand--money"></div>'
+    + '<div class="hand-cursor__hand hand-cursor__hand--reach"></div>'
+    + '<div class="hand-cursor__hand hand-cursor__hand--poke"></div>'
+  document.body.append(drawn)
+
+  const draw = () => {
+    drawn.hidden = !last
+    if (last) drawn.style.transform = `translate3d(${last.x}px, ${last.y}px, 0)`
+  }
+
+  // Is a part of the element really under the cursor here (not hidden under something
+  // else, like the native hover would know)? A few points of the overlap are checked
+  const isReachable = (element, left, top, right, bottom) => {
+    const inset = Math.min(2, (right - left) / 2, (bottom - top) / 2)
+    const points = [
+      [(left + right) / 2, (top + bottom) / 2],
+      [left + inset, top + inset], [right - inset, top + inset],
+      [left + inset, bottom - inset], [right - inset, bottom - inset],
+    ]
+    return points.some(([x, y]) => {
+      const hit = document.elementFromPoint(x, y)
+      return hit && element.contains(hit)
+    })
+  }
+
+  const send = (element, type) =>
+    element.dispatchEvent(new MouseEvent(type, { clientX: last?.x, clientY: last?.y }))
+
+  const update = () => {
+    draw()
+    const next = new Map()
+    if (isOn && last) {
+      const areas = root.classList.contains('is-poking') ? [HAND_AREA, POKE_AREA]
+        : root.classList.contains('is-grabbing') ? [HAND_AREA, GRAB_AREA] : [HAND_AREA]
+      for (const element of document.querySelectorAll(TARGETS)) {
+        const box = element.getBoundingClientRect()
+        if (!box.width || !box.height) continue
+        let covered = 0
+        for (const area of areas) {
+          const left = Math.max(box.left, last.x + area.left, 0)
+          const top = Math.max(box.top, last.y + area.top, 0)
+          const right = Math.min(box.right, last.x + area.left + area.width, innerWidth)
+          const bottom = Math.min(box.bottom, last.y + area.top + area.height, innerHeight)
+          if (right <= left || bottom <= top) continue
+          if (isReachable(element, left, top, right, bottom)) {
+            covered = Math.max(covered, (right - left) * (bottom - top))
+          }
+        }
+        if (covered) next.set(element, covered)
+      }
+    }
+    for (const element of hovered.keys()) if (!next.has(element)) send(element, 'mouseleave')
+    for (const element of next.keys()) if (!hovered.has(element)) send(element, 'mouseenter')
+    hovered = next
+    const covers = selector => [...next.keys()].some(element => element.matches(selector))
+    root.classList.toggle('is-grabbing', covers(CLICKABLE))
+    // over a burst sticker (where hovering bursts) it's the pointing finger instead
+    root.classList.toggle('is-poking', canHoverBurst.matches && covers('.order'))
+  }
+
+  const turn = on => {
+    isOn = on
+    root.classList.toggle('has-hand-cursor', on)
+    if (!on) last = null
+    update()
+  }
+
+  addEventListener('pointermove', event => {
+    if (event.pointerType !== 'mouse' || !hasFineMouse.matches) return
+    last = { x: event.clientX, y: event.clientY }
+    if (!isOn) turn(true)
+    else update()
+  }, { passive: true })
+
+  addEventListener('scroll', () => isOn && update(), { passive: true })
+  addEventListener('resize', () => isOn && update())
+  // the mouse left the window
+  document.addEventListener('mouseout', event => {
+    if (isOn && !event.relatedTarget) {
+      last = null
+      update()
+    }
+  })
+  hasFineMouse.addEventListener('change', () => !hasFineMouse.matches && turn(false))
+
+  // drop the browser's own enter / leave on the targets: the whole hand decides now
+  for (const type of ['mouseenter', 'mouseleave']) {
+    addEventListener(type, event => {
+      if (isOn && event.isTrusted && event.target.matches?.(TARGETS)) event.stopImmediatePropagation()
+    }, true)
+  }
+
+  // a click beside a link, but with the hands over it, goes to the link the hands
+  // cover the most of
+  addEventListener('click', event => {
+    if (!isOn || !event.isTrusted || event.target.closest?.(CLICKABLE)) return
+    let best = null
+    let bestCovered = 0
+    for (const [element, covered] of hovered) {
+      if (element.matches(CLICKABLE) && covered > bestCovered) [best, bestCovered] = [element, covered]
+    }
+    if (!best) return
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    const { ctrlKey, shiftKey, altKey, metaKey, button, clientX, clientY } = event
+    best.dispatchEvent(new MouseEvent('click', {
+      bubbles: true, cancelable: true, view: window,
+      ctrlKey, shiftKey, altKey, metaKey, button, clientX, clientY,
+    }))
+  }, true)
+}
