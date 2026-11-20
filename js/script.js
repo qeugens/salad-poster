@@ -891,15 +891,23 @@ function setUpSwap(link) {
   const text = label.textContent
   label.textContent = ''
   const chars = []
+  // each word in a box of its own, so a line never breaks between two of its letters
+  let word = null
   for (const char of text) {
     if (/\s/.test(char)) {
       label.append(char)
+      word = null
       continue
+    }
+    if (!word) {
+      word = document.createElement('span')
+      word.className = 'swap__word'
+      label.append(word)
     }
     const span = document.createElement('span')
     span.className = 'swap__char'
     span.textContent = char
-    label.append(span)
+    word.append(span)
     chars.push([span, char])
   }
   // the hover look's own characters (€(130)€) join the flickering symbols

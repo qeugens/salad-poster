@@ -1330,6 +1330,17 @@ a:focus-visible .swap__alt {
   text-align: center;
 }
 
+/* The letters are boxes of their own (for the scramble), and a line may break between
+   any two boxes: each word keeps them together */
+.swap__word {
+  white-space: nowrap;
+}
+
+/* >задать / вопрос<: always one word per line */
+.ask .swap__word {
+  display: block;
+}
+
 @media (hover: none) {
   a:is(:focus, :active) .swap__label {
     visibility: hidden;
@@ -2241,11 +2252,12 @@ a:focus-visible .swap__alt {
 }
 
 /* Embedded in another site (an iframe, js/script.js): the strip along the top (between
-   the zigzag's teeth and above them) and the iOS bar strips are white there instead of
-   black, so no black line sits under the site's menu. Painted on the sheet itself,
+   the zigzag's teeth and above them) and the iOS bar strips are #f5f5f5 there instead
+   of black, so no black line sits under the site's menu, and the white sheet's torn
+   edge still shows against it. Painted on the sheet itself,
    since the black canvas behind it is also the black ending */
 .is-embedded {
-  --color-tear: #ffffff;
+  --color-tear: #f5f5f5;
 }
 
 @media (max-width: 770px) {
