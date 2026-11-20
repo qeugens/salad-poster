@@ -1336,9 +1336,11 @@ a:focus-visible .swap__alt {
   white-space: nowrap;
 }
 
-/* >задать / вопрос<: always one word per line */
-.ask .swap__word {
-  display: block;
+/* >задать / вопрос<: on phones always one word per line */
+@media (max-width: 770px) {
+  .ask .swap__word {
+    display: block;
+  }
 }
 
 @media (hover: none) {
