@@ -1627,7 +1627,12 @@ a:focus-visible .swap__alt {
     --content-top: 71.7px;
   }
 
-  /* The page is a white sheet on the black canvas, torn into a zigzag along the top */
+  /* The page is a white sheet (pure white on phones) on the black canvas, torn into a
+     zigzag along the top */
+  :root {
+    --color-bg: #ffffff;
+  }
+
   /* The zigzag sits inside the sheet's top 11.1px, left unpainted so the black shows
      between the teeth: Safari's overflow-x: clip cuts the top too, so it can't hang above */
   .page {
@@ -1637,6 +1642,7 @@ a:focus-visible .swap__alt {
     background: linear-gradient(var(--color-bg), var(--color-bg)) 0 11.1px / 100% 100% no-repeat;
   }
 
+  /* the teeth: the zigzag's shape filled with the page colour */
   .page::before {
     content: "";
     position: absolute;
@@ -1644,7 +1650,9 @@ a:focus-visible .swap__alt {
     left: 0;
     width: 100%;
     height: 11.1px;
-    background: url("../assets/images/zigzag.svg?v=20261119-1") 0 0 / 100% 100%;
+    background: var(--color-bg);
+    -webkit-mask: url("../assets/images/zigzag.svg?v=20261119-1") 0 0 / 100% 100%;
+    mask: url("../assets/images/zigzag.svg?v=20261119-1") 0 0 / 100% 100%;
   }
 
   /* SALAD: the letters are bigger and shuffled from the desktop places, each with an
@@ -2230,4 +2238,30 @@ a:focus-visible .swap__alt {
   position: absolute;
   left: 0;
   right: 0;
+}
+
+/* Embedded in another site (an iframe, js/script.js): the strip along the top (between
+   the zigzag's teeth and above them) and the iOS bar strips are white there instead of
+   black, so no black line sits under the site's menu. Painted on the sheet itself,
+   since the black canvas behind it is also the black ending */
+.is-embedded {
+  --color-tear: #ffffff;
+}
+
+@media (max-width: 770px) {
+  .is-embedded .page {
+    margin-top: 0;
+    padding-top: 16px;
+    background:
+      linear-gradient(var(--color-bg), var(--color-bg)) 0 16px / 100% 100% no-repeat,
+      var(--color-tear);
+  }
+
+  .is-embedded .page::before {
+    top: 4.9px;
+  }
+}
+
+.is-embedded .status-tint {
+  background: var(--color-tear);
 }

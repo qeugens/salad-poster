@@ -1,3 +1,8 @@
+// Embedded in another site (an iframe): the page drops its phone-only edges there
+// (.is-embedded in css/style.css)
+const isEmbedded = window.top !== window
+document.documentElement.classList.toggle('is-embedded', isEmbedded)
+
 // Always open at the very top, zigzag and all: browsers (Safari on iPhone above all) put
 // a reloaded or reopened page back where it was scrolled. A link to a #spot still works
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
@@ -1111,7 +1116,6 @@ addEventListener('keydown', event => isKeyPress(event, 'KeyF') && toggleFun('F')
 // clicked once, so F did nothing at first. So the page takes the keyboard itself: when
 // it has loaded, and whenever the mouse is over it while it doesn't have the keyboard.
 // The outer site can also pass its keys on: postMessage({ salad: 'key', code: 'KeyF' })
-const isEmbedded = window.top !== window
 if (isEmbedded) {
   const takeKeys = () => !document.hasFocus() && window.focus()
   addEventListener('load', takeKeys)
