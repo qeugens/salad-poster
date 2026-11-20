@@ -1172,7 +1172,7 @@ const IDLE_STICKERS = [
     .map(([name, , , w, h]) => [`assets/images/burst/${name}.svg?v=20261108-4`, w, h]),
   ['assets/images/sticker-today-sale.svg?v=20261108-2', 294, 156],
   ['assets/images/sticker-got-tricked.svg?v=20261120-1', 339, 211],
-  ['assets/images/sticker-sw.svg?v=20261120-1', 198, 202],
+  ['assets/images/sticker-sw.svg?v=20261120-2', 206, 210],
 ]
 let idleTimer = 0
 let idleLoop = 0
