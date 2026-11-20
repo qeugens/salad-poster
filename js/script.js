@@ -583,7 +583,7 @@ function buildBurst() {
     return item
   }
   layout.stickers.forEach(([name, ...box], index) => {
-    addItem(`assets/images/burst/${name}.svg?v=20261108-4`, box, index).dataset.name = name
+    addItem(`assets/images/burst/${name}.svg?v=20261120-1`, box, index).dataset.name = name
     const standIn = layout.standIns[name]
     if (standIn) {
       const item = addItem('assets/images/sticker-today-sale.svg?v=20261108-2', standIn, index)
@@ -1169,7 +1169,7 @@ const IDLE_SKIP = ['cherries', 'lightning']
 const IDLE_STICKERS = [
   ...BURST_LAYOUTS.desktop.stickers
     .filter(([name]) => !IDLE_SKIP.includes(name))
-    .map(([name, , , w, h]) => [`assets/images/burst/${name}.svg?v=20261108-4`, w, h]),
+    .map(([name, , , w, h]) => [`assets/images/burst/${name}.svg?v=20261120-1`, w, h]),
   ['assets/images/sticker-today-sale.svg?v=20261108-2', 294, 156],
   ['assets/images/sticker-got-tricked.svg?v=20261120-1', 339, 211],
   ['assets/images/sticker-sw.svg?v=20261120-2', 206, 210],
