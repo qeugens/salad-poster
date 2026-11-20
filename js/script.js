@@ -1162,9 +1162,17 @@ const IDLE_TURN_DEG = 25          // tilt, either way
 const IDLE_FALL_MS = [400, 600]   // how long one takes to fall off the screen
 const IDLE_FALL_STAGGER_MS = 150  // they don't all let go at once
 const IDLE_TOP_GAP = 24           // even the highest one lands whole, this far below the top
+// the burst's stickers (but not the cherries, "you are my favourite customer", or the
+// pink arrow), Today
+// Sale, GOT TRICKED and S*W (Figma 🍏groceries 509:485, 512:543)
+const IDLE_SKIP = ['cherries', 'lightning']
 const IDLE_STICKERS = [
-  ...BURST_LAYOUTS.desktop.stickers.map(([name, , , w, h]) => [`assets/images/burst/${name}.svg?v=20261108-4`, w, h]),
+  ...BURST_LAYOUTS.desktop.stickers
+    .filter(([name]) => !IDLE_SKIP.includes(name))
+    .map(([name, , , w, h]) => [`assets/images/burst/${name}.svg?v=20261108-4`, w, h]),
   ['assets/images/sticker-today-sale.svg?v=20261108-2', 294, 156],
+  ['assets/images/sticker-got-tricked.svg?v=20261120-1', 339, 211],
+  ['assets/images/sticker-sw.svg?v=20261120-1', 198, 202],
 ]
 let idleTimer = 0
 let idleLoop = 0
