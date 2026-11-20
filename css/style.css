@@ -1556,17 +1556,16 @@ a:focus-visible .swap__alt {
 /* Phones: the bag sits in the middle of the screen's bottom edge, 130px wide (Figma frame
    "iPhone 13 & 14 - 2"), its top 116.74px above the bottom of the screen and the rest
    hidden below it. Its parts are set at that size (scaling the bag instead blurs it in
-   Safari); it opens on tap. The poster grows to the screen width (less the margins, and
-   short enough to fit above the bag), centred on the screen, its bottom edge 27px above
-   the bag. The black ending slides over the bag: the part below its top edge is cut
+   Safari); it opens on tap. The poster grows to the full screen width (short enough to
+   fit above the bag), centred on the screen, its bottom edge 7px above the bag. The black ending slides over the bag: the part below its top edge is cut
    away (--bag-cut, set in JS) */
 @media (max-width: 770px) {
   .bag {
     --bag-peek: 116.74px;   /* how much of the bag shows above the bottom of the screen */
-    --poster-gap: 27px;     /* open poster's bottom edge -> the bag's top */
-    /* Open poster width; on short screens no taller than fits above the bag up to 8px
-       below the top of the screen */
-    --poster-w: min(100vw - 2 * var(--margin), (100dvh - var(--seen-top, 0px) - var(--seen-bottom, 0px) - var(--bag-peek) - var(--poster-gap) - 8px) * 0.75);
+    --poster-gap: 7px;      /* open poster's bottom edge -> the bag's top */
+    /* Open poster width: the whole screen width, edge to edge; on short screens no taller
+       than fits above the bag up to 8px below the top of the screen */
+    --poster-w: min(100vw, (100dvh - var(--seen-top, 0px) - var(--seen-bottom, 0px) - var(--bag-peek) - var(--poster-gap) - 8px) * 0.75);
 
     left: calc(50% - 130px / 2);
     bottom: calc(var(--bag-peek) - 221px + var(--seen-bottom, 0px));
