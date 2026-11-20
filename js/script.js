@@ -1154,7 +1154,7 @@ addEventListener('click', () => {
 // the screen one after another, at random spots and tilts, piling over each other, for
 // as long as nobody touches the page. Any mouse move, scroll, tap or key drops the pile:
 // the stickers fall off the bottom of the screen, and the wait starts over. None lands
-// cut off at the top (IDLE_TOP_GAP), nor on phones at the bottom (IDLE_BOTTOM_GAP). The oldest go once there are IDLE_MAX, so it can run forever
+// cut off at the top (IDLE_TOP_GAP). Not on phones. The oldest go once there are IDLE_MAX, so it can run forever
 const IDLE_AFTER_MS = 80000
 const IDLE_EVERY_MS = [2500, 3500]  // wait before the next sticker (random in between)
 const IDLE_MAX = 150
@@ -1162,8 +1162,6 @@ const IDLE_TURN_DEG = 25          // tilt, either way
 const IDLE_FALL_MS = [400, 600]   // how long one takes to fall off the screen
 const IDLE_FALL_STAGGER_MS = 150  // they don't all let go at once
 const IDLE_TOP_GAP = 24           // even the highest one lands whole, this far below the top
-const IDLE_BOTTOM_GAP = 24        // on phones the same at the bottom
-const IDLE_PHONE_SCALE = 2       // phones get them this much bigger
 const IDLE_STICKERS = [
   ...BURST_LAYOUTS.desktop.stickers.map(([name, , , w, h]) => [`assets/images/burst/${name}.svg?v=20261108-4`, w, h]),
   ['assets/images/sticker-today-sale.svg?v=20261108-2', 294, 156],
@@ -1179,19 +1177,17 @@ function idleStick() {
   sticker.className = 'idle-sticker'
   sticker.src = src
   sticker.alt = ''
-  // Figma size on a 1512px screen, smaller on narrower ones (not below 45%); twice
-  // that on phones
-  const scale = Math.min(1, Math.max(0.45, innerWidth / 1512)) * (isPhone.matches ? IDLE_PHONE_SCALE : 1)
+  // Figma size on a 1512px screen, smaller on narrower ones (not below 45%)
+  const scale = Math.min(1, Math.max(0.45, innerWidth / 1512))
   const turn = (Math.random() * 2 - 1) * IDLE_TURN_DEG
   // centred on its spot: the top of the tilted sticker is half its tilted height above
   // it, so the spot starts that far (and the gap) below the top of the seen screen.
   // Under another site's menu that's where it would get cut off
   const rad = (Math.abs(turn) * Math.PI) / 180
   const halfTall = ((width * Math.sin(rad) + height * Math.cos(rad)) * scale) / 2
-  // on phones also above the bottom (else anywhere down to it)
   const layerTall = idleLayer.clientHeight
   const minTop = Math.min(IDLE_TOP_GAP + halfTall, layerTall)
-  const maxTop = isPhone.matches ? Math.max(minTop, layerTall - IDLE_BOTTOM_GAP - halfTall) : layerTall
+  const maxTop = layerTall
   sticker.style.width = `${width * scale}px`
   sticker.style.left = `${Math.random() * 100}%`
   sticker.style.top = `${minTop + Math.random() * (maxTop - minTop)}px`
@@ -1203,6 +1199,7 @@ function idleStick() {
 }
 
 function startIdle() {
+  if (isPhone.matches) return
   idleLayer = document.createElement('div')
   idleLayer.className = 'idle-stickers'
   idleLayer.setAttribute('aria-hidden', 'true')
@@ -1238,6 +1235,7 @@ function wake() {
 for (const type of ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll']) {
   addEventListener(type, wake, { passive: true })
 }
+isPhone.addEventListener('change', wake)  // a pile already out goes when it turns phone-sized
 wake()
 
 // Whole-hand hover: a browser only checks the cursor's single click point, so here the

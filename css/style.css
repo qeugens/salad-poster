@@ -2173,12 +2173,13 @@ a:focus-visible .swap__alt {
   }
 }
 
-/* Fun mode switch (F key; three or more taps on phones): a little pill pops up at the bottom centre
-   for a moment, saying what's on or off */
+/* Fun mode switch (F key; three or more taps on phones): a little pill pops up right in
+   the middle of the screen for a moment, saying what's on or off */
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(24px + var(--seen-bottom, 0px));
+  /* the middle of the seen screen */
+  top: calc(var(--seen-top, 0px) + (100% - var(--seen-top, 0px) - var(--seen-bottom, 0px)) / 2);
   z-index: 30;
   display: flex;
   align-items: center;
@@ -2194,7 +2195,7 @@ a:focus-visible .swap__alt {
   text-transform: uppercase;
   white-space: nowrap;
   pointer-events: none;
-  translate: -50% 0;
+  translate: -50% -50%;
   opacity: 0;
   scale: 0.6;
   transition: opacity 0.15s, scale 0.15s ease-in;
