@@ -277,7 +277,7 @@ html.is-poking .hand-cursor__hand--poke {
   overflow-x: clip;
   min-height: 100vh;
   background: var(--color-bg);
-  padding-bottom: 98px;  /* Figma frame ends 98px below the content */
+  padding-bottom: 24px;  /* the last button ends as far above the bottom as the bag does */
 }
 
 /* 12-column layout: place children with grid-column, e.g. `grid-column: 4 / 10` */
@@ -1645,6 +1645,11 @@ a:focus-visible .swap__alt {
      zigzag along the top */
   :root {
     --color-bg: #ffffff;
+  }
+
+  /* the Figma phone frame ends 98px below the content */
+  .page {
+    padding-bottom: 98px;
   }
 
   /* The zigzag sits inside the sheet's top 11.1px, left unpainted so the black shows
