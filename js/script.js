@@ -1107,6 +1107,20 @@ function toggleFun(key) {
 
 addEventListener('keydown', event => isKeyPress(event, 'KeyF') && toggleFun('F'))
 
+// Embedded in another site (an iframe), the keys go to that site until this page is
+// clicked once, so F did nothing at first. So the page takes the keyboard itself: when
+// it has loaded, and whenever the mouse is over it while it doesn't have the keyboard.
+// The outer site can also pass its keys on: postMessage({ salad: 'key', code: 'KeyF' })
+const isEmbedded = window.top !== window
+if (isEmbedded) {
+  const takeKeys = () => !document.hasFocus() && window.focus()
+  addEventListener('load', takeKeys)
+  addEventListener('pointermove', event => event.pointerType === 'mouse' && takeKeys(), { passive: true })
+  addEventListener('message', ({ data }) => {
+    if (data?.salad === 'key' && data.code === 'KeyF' && !data.repeat) toggleFun('F')
+  })
+}
+
 // Phones: three or more quick taps anywhere do the same (each within TAP_GAP_MS of the
 // last). It switches on the third tap; more taps in the same run don't switch it back,
 // so a run of any length (3, 5, 10 taps) switches it once. A tap that scrolls isn't a
