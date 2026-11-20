@@ -54,6 +54,12 @@ A one-page poster for the **SALAD** workshop, cut out of a Figma layout and toss
   <img src="assets/images/sticker-fuck-u.svg" height="100" alt="FUCK U sticker">
 </p>
 <p align="center">
+  <img src="assets/images/sticker-got-tricked.svg" height="100" alt="GOT TRICKED">
+  <img src="assets/images/sticker-sw.svg" height="100" alt="S*W">
+  <img src="assets/images/burst/go.svg" height="100" alt="GO">
+  <img src="assets/images/burst/order-now.svg" height="100" alt="Order Now!!!">
+</p>
+<p align="center">
   <img src="assets/images/burst/dollar.svg" height="64" alt="$">
   <img src="assets/images/burst/euro.svg" height="64" alt="€">
   <img src="assets/images/burst/pound.svg" height="64" alt="£">
